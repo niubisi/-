@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美团外卖 - 家庭代点</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            user-select: none;
+        }
+        
+        /* 隐藏所有滚动条 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        * {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .status-bar {
+            background-color: #FFD100;
+            height: 44px;
+            color: black;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .nav-bar {
+            background-color: white;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 16px;
+            font-weight: bold;
+            position: relative;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background-color: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-top: 10px;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #999;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .tab-item.active {
+            color: #ff6b35;
+        }
+        .tab-item i {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+        .tab-item.center {
+            position: relative;
+            top: -15px;
+        }
+        .tab-item.center .center-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #FFD100, #FF8C00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(255, 209, 0, 0.3);
+            border: 3px solid white;
+        }
+        .tab-item.center .center-icon i {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 0;
+        }
+        .tab-item.center span {
+            margin-top: 5px;
+            font-size: 10px;
+        }
+        
+        /* AI助手样式 */
+        .ai-assistant {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .ai-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .ai-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .ai-avatar i {
+            color: white;
+            font-size: 24px;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3), 0 0 0 0 rgba(102, 126, 234, 0.4); }
+            70% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3), 0 0 0 10px rgba(102, 126, 234, 0); }
+            100% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3), 0 0 0 0 rgba(102, 126, 234, 0); }
+        }
+        
+        .ai-chat-panel {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 300px;
+            max-height: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            transform: translateY(20px) scale(0.9);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .ai-chat-panel.active {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .ai-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            color: white;
+        }
+        
+        .ai-messages {
+            padding: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .ai-message {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .ai-message.warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left: 4px solid #f39c12;
+        }
+        
+        .ai-message.recommendation {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 4px solid #2196f3;
+        }
+        
+        .ai-message.offer {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            border-left: 4px solid #ff9800;
+        }
+        
+        .ai-message.location {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border-left: 4px solid #9c27b0;
+        }
+        
+        .ai-message .ai-icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .ai-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .ai-notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .family-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .family-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+        }
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid white;
+            position: relative;
+        }
+        .member-status {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        .group-order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .discount-badge {
+            position: absolute;
+            top: -8px;
+            right: 16px;
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .meal-schedule {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .day-cell {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 4px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .day-cell.scheduled {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: white;
+        }
+        .day-cell.today {
+            background: linear-gradient(135deg, #FFD100, #FF9800);
+            color: white;
+        }
+        .time-slot {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #FFD100;
+        }
+        .connecting-line {
+            position: relative;
+        }
+        .connecting-line::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -12px;
+            width: 24px;
+            height: 2px;
+            background: #ddd;
+            transform: translateY(-50%);
+        }
+        .floating-love {
+            position: absolute;
+            color: #FF6B6B;
+            animation: floatLove 3s infinite ease-in-out;
+        }
+        @keyframes floatLove {
+            0%, 100% { transform: translateY(0px) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-15px) scale(1.2); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="flex items-center">
+            <span>22:45</span>
+            <img src="https://images.pexels.com/photos/1493226/pexels-photo-1493226.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&dpr=2" class="w-5 h-5 ml-1 rounded-full" alt="微信">
+        </div>
+        <div class="flex items-center">
+            <span class="mr-1">5G</span>
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi ml-1"></i>
+            <i class="fas fa-battery-full ml-1"></i>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <div class="nav-bar">
+        <button class="absolute left-4">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="flex-1 text-center">代点管家</div>
+        <div class="flex items-center">
+            <button class="ml-4">
+                <i class="fas fa-users"></i>
+            </button>
+            <button class="ml-4">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 组群选择 -->
+    <div class="px-4 mt-4">
+        <div class="flex space-x-2 overflow-x-auto pb-2">
+            <button class="flex-shrink-0 bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md">
+                <i class="fas fa-home mr-1"></i>张家大院
+            </button>
+            <button class="flex-shrink-0 bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm">
+                <i class="fas fa-user-friends mr-1"></i>大学室友
+            </button>
+            <button class="flex-shrink-0 bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm">
+                <i class="fas fa-heart mr-1"></i>闺蜜团
+            </button>
+            <button class="flex-shrink-0 bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm">
+                <i class="fas fa-briefcase mr-1"></i>同事圈
+            </button>
+            <button class="flex-shrink-0 bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full text-sm">
+                <i class="fas fa-plus-circle mr-1"></i>新建组群
+            </button>
+        </div>
+    </div>
+
+    <!-- 家庭主卡片 -->
+    <div class="mx-4 mt-4">
+        <div class="family-card">
+            <div class="floating-love" style="top: 20px; right: 30px; animation-delay: 0s;">
+                <i class="fas fa-heart text-lg"></i>
+            </div>
+            <div class="floating-love" style="top: 50px; right: 50px; animation-delay: 2s;">
+                <i class="fas fa-heart text-sm"></i>
+            </div>
+            
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold mb-2">张家大院 👨‍👩‍👧‍👦</h2>
+                        <p class="text-white text-opacity-90 text-sm">跨越距离的关怀，智能代点每一餐</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-white text-opacity-80">今日活跃</div>
+                        <div class="flex items-center text-white">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mr-1"></div>
+                            <span class="text-sm">3人在线</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 家庭成员 -->
+                <div class="flex items-center space-x-3 mb-4 overflow-x-auto">
+                    <div class="text-center flex-shrink-0">
+                        <div class="member-avatar bg-gray-300 overflow-hidden relative">
+                            <img src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-full object-cover" alt="爸爸">
+                            <div class="member-status bg-green-400"></div>
+                        </div>
+                        <div class="text-xs mt-1 font-bold">爸爸</div>
+                        <div class="text-xs text-white text-opacity-80 flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt mr-1 text-xs"></i>单位
+                        </div>
+                    </div>
+                    <div class="text-center flex-shrink-0">
+                        <div class="member-avatar bg-gray-300 overflow-hidden relative">
+                            <img src="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-full object-cover" alt="妈妈">
+                            <div class="member-status bg-green-400"></div>
+                        </div>
+                        <div class="text-xs mt-1 font-bold">妈妈</div>
+                        <div class="text-xs text-white text-opacity-80 flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt mr-1 text-xs"></i>家里
+                        </div>
+                    </div>
+                    <div class="text-center flex-shrink-0">
+                        <div class="member-avatar bg-gray-300 overflow-hidden relative">
+                            <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-full object-cover" alt="小明">
+                            <div class="member-status bg-yellow-400"></div>
+                        </div>
+                        <div class="text-xs mt-1 font-bold">小明(我)</div>
+                        <div class="text-xs text-white text-opacity-80 flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt mr-1 text-xs"></i>学校
+                        </div>
+                    </div>
+                    <div class="text-center flex-shrink-0">
+                        <div class="member-avatar bg-gray-200 border-dashed border-white flex items-center justify-center">
+                            <i class="fas fa-plus text-white"></i>
+                        </div>
+                        <div class="text-xs mt-1">添加</div>
+                        <div class="text-xs text-white text-opacity-60">成员</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mt-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">12</div>
+                        <div class="text-white text-opacity-80 text-xs">本月代点</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">¥368</div>
+                        <div class="text-white text-opacity-80 text-xs">节省金额</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">5</div>
+                        <div class="text-white text-opacity-80 text-xs">拼单次数</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 智能推荐 -->
+    <div class="px-4 mt-4">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-lg">智能代点</h3>
+            <span class="text-xs text-gray-500">基于用餐习惯</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-tie text-blue-600 mr-2"></i>
+                        <span class="font-bold text-sm">爸爸常点</span>
+                    </div>
+                    <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">单位</span>
+                </div>
+                <div class="text-xs text-gray-600 mb-2">红烧肉套餐 + 白米饭</div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold text-blue-600">¥32</span>
+                    <button class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs">一键代点</button>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-3 border border-pink-200">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                        <i class="fas fa-female text-pink-600 mr-2"></i>
+                        <span class="font-bold text-sm">妈妈偏好</span>
+                    </div>
+                    <span class="text-xs bg-pink-600 text-white px-2 py-1 rounded-full">家里</span>
+                </div>
+                <div class="text-xs text-gray-600 mb-2">清蒸鱼 + 时令蔬菜</div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold text-pink-600">¥28</span>
+                    <button class="bg-pink-600 text-white px-3 py-1 rounded-full text-xs">一键代点</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-3 border border-yellow-200">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center mb-1">
+                        <i class="fas fa-users text-yellow-600 mr-2"></i>
+                        <span class="font-bold text-sm">全家套餐</span>
+                        <span class="text-xs bg-yellow-600 text-white px-2 py-1 rounded-full ml-2">拼单优惠</span>
+                    </div>
+                    <div class="text-xs text-gray-600 mb-2">根据全家口味智能搭配，立减¥15</div>
+                    <div class="text-sm font-bold text-yellow-600">¥85 <span class="text-xs text-gray-400 line-through">¥100</span></div>
+                </div>
+                <button class="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-4 py-2 rounded-full text-sm font-bold">
+                    智能配餐
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 今日团餐 -->
+    <div class="px-4 mt-4">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-lg">今日团餐</h3>
+            <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">进行中</span>
+        </div>
+
+        <div class="group-order-card">
+            <div class="discount-badge">拼单立减¥15</div>
+            
+            <div class="flex items-center mb-4">
+                <div class="flex-1">
+                    <h4 class="font-bold mb-2">晚餐团购 - 18:30送达</h4>
+                    <div class="flex items-center text-xs text-gray-500">
+                        <i class="fas fa-clock mr-1"></i>
+                        <span>预计配送时间：18:25-18:35</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-bold text-yellow-600">¥85</div>
+                    <div class="text-xs text-gray-400 line-through">¥100</div>
+                </div>
+            </div>
+
+            <!-- 参与成员 -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <img src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+                             class="w-8 h-8 rounded-full mr-3" alt="爸爸">
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-bold text-sm mr-2">爸爸</span>
+                                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">单位</span>
+                            </div>
+                            <div class="text-xs text-gray-500">红烧肉套餐 • 18:30送达</div>
+                        </div>
+                    </div>
+                    <div class="text-yellow-600 font-bold">¥32</div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <img src="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+                             class="w-8 h-8 rounded-full mr-3" alt="妈妈">
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-bold text-sm mr-2">妈妈</span>
+                                <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">家里</span>
+                            </div>
+                            <div class="text-xs text-gray-500">清蒸鱼 + 时蔬 • 18:25送达</div>
+                        </div>
+                    </div>
+                    <div class="text-yellow-600 font-bold">¥28</div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div class="flex items-center">
+                        <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+                             class="w-8 h-8 rounded-full mr-3" alt="小明">
+                        <div>
+                            <div class="flex items-center">
+                                <span class="font-bold text-sm mr-2">小明(我)</span>
+                                <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">学校</span>
+                            </div>
+                            <div class="text-xs text-gray-500">鸡胸肉沙拉 • 18:35送达</div>
+                        </div>
+                    </div>
+                    <div class="text-yellow-600 font-bold">¥25</div>
+                </div>
+            </div>
+
+            <div class="mt-4 flex space-x-2">
+                <button class="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg text-sm">
+                    <i class="fas fa-edit mr-1"></i>修改菜品
+                </button>
+                <button class="flex-1 bg-yellow-400 text-black py-2 rounded-lg text-sm font-bold">
+                    <i class="fas fa-credit-card mr-1"></i>立即付款
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 周餐表设置 -->
+    <div class="px-4 mt-4">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-lg">本周餐表</h3>
+            <button class="text-yellow-600 text-sm">设置提醒</button>
+        </div>
+
+        <div class="bg-white rounded-lg p-4">
+            <div class="meal-schedule">
+                <div class="day-cell">
+                    <div class="text-xs text-gray-500">周一</div>
+                    <div class="text-lg mt-1">🍱</div>
+                </div>
+                <div class="day-cell">
+                    <div class="text-xs text-gray-500">周二</div>
+                    <div class="text-lg mt-1">🍜</div>
+                </div>
+                <div class="day-cell today">
+                    <div class="text-xs">周三</div>
+                    <div class="text-lg mt-1">🍗</div>
+                </div>
+                <div class="day-cell scheduled">
+                    <div class="text-xs">周四</div>
+                    <div class="text-lg mt-1">🐟</div>
+                </div>
+                <div class="day-cell scheduled">
+                    <div class="text-xs">周五</div>
+                    <div class="text-lg mt-1">🥗</div>
+                </div>
+                <div class="day-cell">
+                    <div class="text-xs text-gray-500">周六</div>
+                    <div class="text-lg mt-1">🍕</div>
+                </div>
+                <div class="day-cell">
+                    <div class="text-xs text-gray-500">周日</div>
+                    <div class="text-lg mt-1">🥘</div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-xs text-gray-500 text-center">
+                绿色表示已设置自动下单，黄色表示今日
+            </div>
+        </div>
+    </div>
+
+    <!-- 代点时间设置 -->
+    <div class="px-4 mt-4">
+        <h3 class="font-bold text-lg mb-3">跨地点定时代点</h3>
+        
+        <div class="bg-white rounded-lg p-4">
+            <div class="space-y-4">
+                <div class="time-slot">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <i class="fas fa-sun text-yellow-500 mr-2"></i>
+                            <span class="font-bold">早餐时间</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-600 mr-2">07:30</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked>
+                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-400"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500">为不同地点的家人自动下单营养早餐</div>
+                </div>
+
+                <div class="time-slot">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <i class="fas fa-sun text-orange-500 mr-2"></i>
+                            <span class="font-bold">午餐时间</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-600 mr-2">11:30</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer">
+                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-400"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500">智能匹配工作地点附近优质商家</div>
+                </div>
+
+                <div class="time-slot">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <i class="fas fa-moon text-purple-500 mr-2"></i>
+                            <span class="font-bold">晚餐时间</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-600 mr-2">17:30</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked>
+                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-400"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500">跨地点团餐配送，自动拼单优惠</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 温馨提示 -->
+    <div class="px-4 mt-4 mb-32">
+        <div class="bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg p-4">
+            <div class="flex items-center mb-3">
+                <i class="fas fa-heart text-pink-500 mr-2"></i>
+                <h4 class="font-bold text-gray-800">贴心功能</h4>
+            </div>
+            <div class="space-y-2 text-sm text-gray-600">
+                <div class="flex items-start">
+                    <span class="mr-2">📍</span>
+                    <span>智能识别成员位置，自动匹配附近优质商家</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="mr-2">🧠</span>
+                    <span>AI学习用餐习惯，一键快速代点常吃菜品</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="mr-2">👥</span>
+                    <span>支持多种组群：家庭、朋友、同事都能代点关怀</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="mr-2">⏰</span>
+                    <span>代点功能会在设定时间前30分钟自动下单</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="mr-2">💰</span>
+                    <span>组群拼单可享受额外5-15元优惠</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="mr-2">📱</span>
+                    <span>实时推送订单状态，异地也能贴心照顾</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI智能助手 -->
+    <div class="ai-assistant">
+        <div class="ai-avatar" onclick="toggleAiChat()">
+            <i class="fas fa-robot"></i>
+            <div class="ai-notification-badge" id="aiBadge">2</div>
+        </div>
+        
+        <div class="ai-chat-panel" id="aiChatPanel">
+            <div class="ai-header">
+                <button class="ai-close" onclick="toggleAiChat()">×</button>
+                <div class="flex items-center">
+                    <i class="fas fa-robot mr-2"></i>
+                    <div>
+                        <div class="font-bold">家庭代点助手</div>
+                        <div class="text-xs opacity-80">贴心照顾每一位家人</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-messages" id="aiMessages">
+                <div class="ai-message recommendation">
+                    <i class="ai-icon">👨‍👩‍👧‍👦</i>
+                    您的家庭代点功能很受欢迎！爸爸妈妈都很喜欢您为他们点的营养搭配。
+                </div>
+                
+                <div class="ai-message warning">
+                    <i class="ai-icon">⏰</i>
+                    小明在学校的午餐时间快到了，要不要为他提前点份健康套餐？
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="tab-bar">
+        <div class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-ticket-alt"></i>
+            <span>神券</span>
+        </div>
+        <div class="tab-item center">
+            <div class="center-icon">
+                <i class="fas fa-expand-alt"></i>
+            </div>
+            <span>膨胀</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-list-alt"></i>
+            <span>订单</span>
+        </div>
+        <div class="tab-item active">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <script>
+        let aiChatOpen = false;
+        let messageCount = 2;
+
+        // 切换AI聊天面板
+        function toggleAiChat() {
+            const panel = document.getElementById('aiChatPanel');
+            const badge = document.getElementById('aiBadge');
+            
+            aiChatOpen = !aiChatOpen;
+            
+            if (aiChatOpen) {
+                panel.classList.add('active');
+                badge.style.display = 'none';
+            } else {
+                panel.classList.remove('active');
+            }
+        }
+
+        // 家庭代点专属AI提醒消息
+        const familyAiMessages = [
+            {
+                type: 'recommendation',
+                icon: '👨‍👩‍👧‍👦',
+                text: '发现您经常为家人代点外卖，建议设置定时提醒，让关爱更准时！'
+            },
+            {
+                type: 'warning',
+                icon: '🥗',
+                text: '爸爸最近点的肉类较多，建议搭配一些蔬菜沙拉，营养更均衡！'
+            },
+            {
+                type: 'offer',
+                icon: '💝',
+                text: '母亲节特惠！为妈妈点份燕窝粥，表达您的孝心，还享8折优惠！'
+            },
+            {
+                type: 'location',
+                icon: '🏠',
+                text: '检测到家人分布在不同地点，智能配送路线已优化，预计同时送达！'
+            },
+            {
+                type: 'recommendation',
+                icon: '🎂',
+                text: '小明生日快到了！要不要为他准备一个惊喜生日套餐？'
+            },
+            {
+                type: 'warning',
+                icon: '⏰',
+                text: '妈妈的降压药需要按时服用，建议为她点清淡易消化的食物。'
+            },
+            {
+                type: 'offer',
+                icon: '👨‍👩‍👧‍👦',
+                text: '家庭拼单优惠升级！3人以上订餐立减20元，快召集家人一起享用！'
+            }
+        ];
+
+        // 随机显示家庭代点AI提醒
+        function showFamilyAiMessage() {
+            const messagesContainer = document.getElementById('aiMessages');
+            const badge = document.getElementById('aiBadge');
+            
+            if (messageCount < 10) {
+                const randomMessage = familyAiMessages[Math.floor(Math.random() * familyAiMessages.length)];
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = `ai-message ${randomMessage.type}`;
+                messageElement.innerHTML = `
+                    <i class="ai-icon">${randomMessage.icon}</i>
+                    ${randomMessage.text}
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+                messageCount++;
+                
+                if (!aiChatOpen) {
+                    badge.style.display = 'flex';
+                    badge.textContent = messageCount > 9 ? '9+' : messageCount;
+                }
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                if (messagesContainer.children.length > 6) {
+                    messagesContainer.removeChild(messagesContainer.firstChild);
+                }
+            }
+        }
+
+        // 家庭代点时间提醒
+        function familyTimeReminders() {
+            const now = new Date();
+            const hour = now.getHours();
+            const messagesContainer = document.getElementById('aiMessages');
+            
+            let timeMessage = '';
+            
+            if (hour >= 7 && hour < 9) {
+                timeMessage = {
+                    type: 'recommendation',
+                    icon: '🌅',
+                    text: '早安！别忘了为家人准备营养早餐，建议豆浆配包子，温暖开启新一天！'
+                };
+            } else if (hour >= 11 && hour < 14) {
+                timeMessage = {
+                    type: 'warning',
+                    icon: '🍽️',
+                    text: '午餐时间！爸爸在单位，妈妈在家，小明在学校，都安排好了吗？'
+                };
+            } else if (hour >= 17 && hour < 19) {
+                timeMessage = {
+                    type: 'recommendation',
+                    icon: '🏠',
+                    text: '晚餐团聚时光～建议点个家庭套餐，大家一起享用美食！'
+                };
+            }
+            
+            if (timeMessage) {
+                const messageElement = document.createElement('div');
+                messageElement.className = `ai-message ${timeMessage.type}`;
+                messageElement.innerHTML = `
+                    <i class="ai-icon">${timeMessage.icon}</i>
+                    ${timeMessage.text}
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        // 初始化家庭AI助手
+        function initFamilyAiAssistant() {
+            setTimeout(familyTimeReminders, 2000);
+            
+            setInterval(() => {
+                const randomDelay = Math.random() * 15000 + 25000;
+                setTimeout(showFamilyAiMessage, randomDelay);
+            }, 40000);
+        }
+
+        document.addEventListener('DOMContentLoaded', initFamilyAiAssistant);
+
+        // 点击其他地方关闭面板
+        document.addEventListener('click', function(event) {
+            const aiAssistant = document.querySelector('.ai-assistant');
+            const aiChatPanel = document.getElementById('aiChatPanel');
+            
+            if (!aiAssistant.contains(event.target) && aiChatOpen) {
+                aiChatPanel.classList.remove('active');
+                aiChatOpen = false;
+            }
+        });
+    </script>
+</body>
+</html> 

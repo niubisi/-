@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>骑手装扮打赏 - 美团外卖</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            padding: 15px 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .rider-info {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .rider-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            float: left;
+            margin-right: 15px;
+        }
+
+        .rider-details h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .rider-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .stat {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .tip-explanation {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            margin: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .explanation-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .explanation-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .earnings-display {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .earnings-title {
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .earnings-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .earning-item {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .earning-amount {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .earning-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .categories {
+            display: flex;
+            margin: 20px;
+            background: white;
+            border-radius: 25px;
+            padding: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .category {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category.active {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .costumes-grid {
+            margin: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .costume-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .costume-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .costume-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .costume-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .costume-pricing {
+            margin-bottom: 15px;
+        }
+
+        .cycle-price {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+
+        .single-price {
+            font-size: 11px;
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .cycle-info {
+            font-size: 10px;
+            color: #666;
+            line-height: 1.3;
+        }
+
+        .purchase-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .purchase-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4757;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .limited-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .gift-section {
+            margin: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .gift-title {
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .gift-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .gift-item {
+            text-align: center;
+            padding: 15px 10px;
+            border: 2px solid #f1f1f1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gift-item:hover, .gift-item.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+        }
+
+        .gift-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .gift-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .gift-price {
+            font-size: 11px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .purchase-summary {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .summary-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .summary-total {
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .confirm-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 300px;
+            margin: 20px;
+        }
+
+        .success-icon {
+            font-size: 48px;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .cycling-animation {
+            animation: cycle 2s ease-in-out infinite;
+        }
+
+        @keyframes cycle {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(360deg); }
+        }
+
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎭 骑手装扮打赏系统</h1>
+    </div>
+
+    <div class="rider-info clearfix">
+        <div class="rider-avatar">🏍️</div>
+        <div class="rider-details">
+            <h3>王师傅 (专属骑手)</h3>
+            <div class="rider-stats">
+                <span class="stat">⭐ 4.9分</span>
+                <span class="stat">🚚 已送2847单</span>
+                <span class="stat">🏆 五星骑手</span>
+            </div>
+            <div style="font-size: 12px; color: #999;">距离您2.3公里 • 预计15分钟送达</div>
+        </div>
+    </div>
+
+    <div class="tip-explanation">
+        <div class="explanation-title">💝 周期性装扮打赏说明</div>
+        <div class="explanation-text">
+            选择周期装扮，每次配送自动展示效果并扣除次数<br>
+            <strong>所有收益100%归骑手所有</strong>，按次结算到账
+        </div>
+    </div>
+
+    <div class="earnings-display">
+        <div class="earnings-title">📊 实时收益分配</div>
+        <div class="earnings-grid">
+            <div class="earning-item">
+                <div class="earning-amount">¥42.6</div>
+                <div class="earning-label">今日装扮收益</div>
+            </div>
+            <div class="earning-item">
+                <div class="earning-amount">¥189.2</div>
+                <div class="earning-label">配送收入</div>
+            </div>
+            <div class="earning-item">
+                <div class="earning-amount">¥231.8</div>
+                <div class="earning-label">总收益</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="categories">
+        <div class="category active" data-category="cycle">💫 周期装扮</div>
+        <div class="category" data-category="gifts">🎁 打赏礼物</div>
+        <div class="category" data-category="premium">👑 限定装扮</div>
+    </div>
+
+    <div id="cycle-costumes" class="costumes-grid">
+        <div class="costume-card" data-costume="ninja">
+            <div class="popular-badge">热门</div>
+            <span class="costume-icon cycling-animation">🥷</span>
+            <div class="costume-name">忍者装扮</div>
+            <div class="costume-pricing">
+                <div class="cycle-price">7次 ¥7.0</div>
+                <div class="single-price">单次 ¥1.5</div>
+                <div class="cycle-info">每次配送¥1.0到账<br>节省¥3.5</div>
+            </div>
+            <button class="purchase-btn">选择周期装扮</button>
+        </div>
+
+        <div class="costume-card" data-costume="knight">
+            <span class="costume-icon cycling-animation">⚔️</span>
+            <div class="costume-name">骑士装扮</div>
+            <div class="costume-pricing">
+                <div class="cycle-price">7次 ¥12.6</div>
+                <div class="single-price">单次 ¥2.5</div>
+                <div class="cycle-info">每次配送¥1.8到账<br>节省¥4.9</div>
+            </div>
+            <button class="purchase-btn">选择周期装扮</button>
+        </div>
+
+        <div class="costume-card" data-costume="cyber">
+            <span class="costume-icon cycling-animation">🤖</span>
+            <div class="costume-name">赛博装扮</div>
+            <div class="costume-pricing">
+                <div class="cycle-price">7次 ¥9.8</div>
+                <div class="single-price">单次 ¥2.0</div>
+                <div class="cycle-info">每次配送¥1.4到账<br>节省¥4.2</div>
+            </div>
+            <button class="purchase-btn">选择周期装扮</button>
+        </div>
+
+        <div class="costume-card" data-costume="flame">
+            <span class="costume-icon cycling-animation">🔥</span>
+            <div class="costume-name">烈焰装扮</div>
+            <div class="costume-pricing">
+                <div class="cycle-price">7次 ¥8.4</div>
+                <div class="single-price">单次 ¥1.8</div>
+                <div class="cycle-info">每次配送¥1.2到账<br>节省¥4.2</div>
+            </div>
+            <button class="purchase-btn">选择周期装扮</button>
+        </div>
+
+        <div class="costume-card" data-costume="ice">
+            <span class="costume-icon cycling-animation">❄️</span>
+            <div class="costume-name">冰霜装扮</div>
+            <div class="costume-pricing">
+                <div class="cycle-price">7次 ¥10.5</div>
+                <div class="single-price">单次 ¥2.2</div>
+                <div class="cycle-info">每次配送¥1.5到账<br>节省¥4.9</div>
+            </div>
+            <button class="purchase-btn">选择周期装扮</button>
+        </div>
+
+        <div class="costume-card" data-costume="royal">
+            <div class="limited-badge">限定</div>
+            <span class="costume-icon cycling-animation">👑</span>
+            <div class="costume-name">皇家装扮</div>
+            <div class="costume-pricing">
+                <div class="cycle-price">7次 ¥28.0</div>
+                <div class="single-price">单次 ¥5.0</div>
+                <div class="cycle-info">每次配送¥4.0到账<br>节省¥7.0</div>
+            </div>
+            <button class="purchase-btn">选择周期装扮</button>
+        </div>
+    </div>
+
+    <div id="gifts-section" class="gift-section" style="display: none;">
+        <div class="gift-title">🎁 即时打赏礼物</div>
+        <div class="gift-grid">
+            <div class="gift-item" data-gift="coffee" data-price="3.0">
+                <div class="gift-icon">☕</div>
+                <div class="gift-name">热咖啡</div>
+                <div class="gift-price">¥3.0</div>
+            </div>
+            <div class="gift-item" data-gift="cola" data-price="2.5">
+                <div class="gift-icon">🥤</div>
+                <div class="gift-name">可乐</div>
+                <div class="gift-price">¥2.5</div>
+            </div>
+            <div class="gift-item" data-gift="cake" data-price="8.0">
+                <div class="gift-icon">🍰</div>
+                <div class="gift-name">小蛋糕</div>
+                <div class="gift-price">¥8.0</div>
+            </div>
+            <div class="gift-item" data-gift="flower" data-price="15.0">
+                <div class="gift-icon">🌹</div>
+                <div class="gift-name">鲜花</div>
+                <div class="gift-price">¥15.0</div>
+            </div>
+            <div class="gift-item" data-gift="energy" data-price="5.0">
+                <div class="gift-icon">⚡</div>
+                <div class="gift-name">能量饮料</div>
+                <div class="gift-price">¥5.0</div>
+            </div>
+            <div class="gift-item" data-gift="luck" data-price="20.0">
+                <div class="gift-icon">🍀</div>
+                <div class="gift-name">幸运符</div>
+                <div class="gift-price">¥20.0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="purchase-summary">
+        <div class="summary-title">💳 购买明细</div>
+        <div id="summary-content">
+            <div style="text-align: center; color: #999; padding: 20px;">
+                请选择装扮或礼物
+            </div>
+        </div>
+        <button class="confirm-btn" id="confirm-purchase" style="display: none;">
+            确认购买并打赏
+        </button>
+    </div>
+
+    <div class="success-modal" id="success-modal">
+        <div class="success-content">
+            <div class="success-icon">✅</div>
+            <h3>购买成功！</h3>
+            <p id="success-message"></p>
+            <button class="confirm-btn" onclick="closeModal()">确定</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedItems = [];
+        let totalAmount = 0;
+
+        // 分类切换
+        document.querySelectorAll('.category').forEach(cat => {
+            cat.addEventListener('click', () => {
+                document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
+                cat.classList.add('active');
+                
+                const category = cat.dataset.category;
+                document.getElementById('cycle-costumes').style.display = category === 'cycle' ? 'grid' : 'none';
+                document.getElementById('gifts-section').style.display = category === 'gifts' ? 'block' : 'none';
+                
+                // 重置选择
+                selectedItems = [];
+                updateSummary();
+            });
+        });
+
+        // 周期装扮选择
+        document.querySelectorAll('.costume-card .purchase-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const card = btn.closest('.costume-card');
+                const costume = card.dataset.costume;
+                const name = card.querySelector('.costume-name').textContent;
+                const price = parseFloat(card.querySelector('.cycle-price').textContent.match(/¥([\d.]+)/)[1]);
+                
+                selectedItems = [{
+                    type: 'costume',
+                    id: costume,
+                    name: name,
+                    price: price,
+                    cycles: 7
+                }];
+                updateSummary();
+            });
+        });
+
+        // 礼物选择
+        document.querySelectorAll('.gift-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const gift = item.dataset.gift;
+                const name = item.querySelector('.gift-name').textContent;
+                const price = parseFloat(item.dataset.price);
+                
+                item.classList.toggle('selected');
+                
+                const existingIndex = selectedItems.findIndex(i => i.id === gift);
+                if (existingIndex >= 0) {
+                    selectedItems.splice(existingIndex, 1);
+                } else {
+                    selectedItems.push({
+                        type: 'gift',
+                        id: gift,
+                        name: name,
+                        price: price
+                    });
+                }
+                updateSummary();
+            });
+        });
+
+        function updateSummary() {
+            const summaryContent = document.getElementById('summary-content');
+            const confirmBtn = document.getElementById('confirm-purchase');
+            
+            if (selectedItems.length === 0) {
+                summaryContent.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">请选择装扮或礼物</div>';
+                confirmBtn.style.display = 'none';
+                return;
+            }
+            
+            let html = '';
+            totalAmount = 0;
+            
+            selectedItems.forEach(item => {
+                totalAmount += item.price;
+                if (item.type === 'costume') {
+                    html += `
+                        <div class="summary-item">
+                            <span>${item.name} (${item.cycles}次)</span>
+                            <span>¥${item.price.toFixed(1)}</span>
+                        </div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                            每次配送 ¥${(item.price / item.cycles).toFixed(1)} 直接到骑手账户
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="summary-item">
+                            <span>${item.name}</span>
+                            <span>¥${item.price.toFixed(1)}</span>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += `
+                <div class="summary-item summary-total">
+                    <span>总计</span>
+                    <span>¥${totalAmount.toFixed(1)}</span>
+                </div>
+                <div style="font-size: 12px; color: #ff6b6b; text-align: center; margin-top: 10px;">
+                    💰 100%收益归骑手所有
+                </div>
+            `;
+            
+            summaryContent.innerHTML = html;
+            confirmBtn.style.display = 'block';
+        }
+
+        // 确认购买
+        document.getElementById('confirm-purchase').addEventListener('click', () => {
+            let message = '';
+            if (selectedItems.some(item => item.type === 'costume')) {
+                const costume = selectedItems.find(item => item.type === 'costume');
+                message = `周期装扮"${costume.name}"购买成功！\n将在接下来7次配送中展示特效\n每次¥${(costume.price / costume.cycles).toFixed(1)}自动到账`;
+            } else {
+                message = `礼物打赏成功！\n¥${totalAmount.toFixed(1)}已发送给骑手\n感谢您的支持！`;
+            }
+            
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('success-modal').style.display = 'flex';
+            
+            // 重置选择
+            selectedItems = [];
+            document.querySelectorAll('.gift-item').forEach(item => item.classList.remove('selected'));
+            updateSummary();
+        });
+
+        function closeModal() {
+            document.getElementById('success-modal').style.display = 'none';
+        }
+
+        // 初始化动画
+        setInterval(() => {
+            document.querySelectorAll('.cycling-animation').forEach(el => {
+                el.style.transform = `scale(${1 + Math.random() * 0.2}) rotate(${Math.random() * 360}deg)`;
+            });
+        }, 2000);
+    </script>
+</body>
+</html> 

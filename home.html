@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美团外卖 - 首页</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            user-select: none;
+        }
+        
+        /* 隐藏所有滚动条 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        * {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .status-bar {
+            background-color: #FFD100;
+            height: 44px;
+            color: black;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .search-bar {
+            background-color: white;
+            border-radius: 100px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            color: #999;
+            font-size: 14px;
+        }
+        .category {
+            width: 65px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+        .store-card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .coupon {
+            background-color: #fffaf0;
+            border: 1px solid #fde2af;
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .tab {
+            padding: 12px 0;
+            margin: 0 16px;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+        .tab.active {
+            color: #FFD100;
+            font-weight: bold;
+        }
+        .tab.active:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background-color: #FFD100;
+            border-radius: 3px;
+        }
+        .dish-card {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .dish-info {
+            flex: 1;
+            padding-right: 12px;
+        }
+        .dish-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .nutrition-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            color: white;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background-color: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-top: 10px;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #999;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .tab-item.active {
+            color: #ff6b35;
+        }
+        .tab-item i {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+        .tab-item.center {
+            position: relative;
+            top: -15px;
+        }
+        .tab-item.center .center-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #FFD100, #FF8C00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(255, 209, 0, 0.3);
+            border: 3px solid white;
+        }
+        .tab-item.center .center-icon i {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 0;
+        }
+        .tab-item.center span {
+            margin-top: 5px;
+            font-size: 10px;
+        }
+        
+        /* AI助手样式 */
+        .ai-assistant {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .ai-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .ai-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .ai-avatar i {
+            color: white;
+            font-size: 24px;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3), 0 0 0 0 rgba(102, 126, 234, 0.4); }
+            70% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3), 0 0 0 10px rgba(102, 126, 234, 0); }
+            100% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3), 0 0 0 0 rgba(102, 126, 234, 0); }
+        }
+        
+        .ai-chat-panel {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 300px;
+            max-height: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            transform: translateY(20px) scale(0.9);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .ai-chat-panel.active {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .ai-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            color: white;
+        }
+        
+        .ai-messages {
+            padding: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .ai-message {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .ai-message.warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left: 4px solid #f39c12;
+        }
+        
+        .ai-message.recommendation {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 4px solid #2196f3;
+        }
+        
+        .ai-message.offer {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            border-left: 4px solid #ff9800;
+        }
+        
+        .ai-message.location {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border-left: 4px solid #9c27b0;
+        }
+        
+        .ai-message .ai-icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .ai-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .ai-notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .filter {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: white;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        .filter-item {
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .nutrition-info {
+            display: flex;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="flex items-center">
+            <span>22:45</span>
+            <img src="https://images.pexels.com/photos/1493226/pexels-photo-1493226.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&dpr=2" class="w-5 h-5 ml-1 rounded-full" alt="微信">
+        </div>
+        <div class="flex items-center">
+            <span class="mr-1">40.0 KB/s</span>
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi ml-1"></i>
+            <i class="fas fa-battery-three-quarters ml-1"></i>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <div class="bg-white py-3 px-4 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 text-black font-bold">
+                <span class="text-lg">首页</span>
+                <span class="text-gray-400">|</span>
+                <span class="text-lg text-gray-600">自取</span>
+            </div>
+        </div>
+        <div class="flex items-center text-sm text-gray-600">
+            <i class="fas fa-map-marker-alt mr-1"></i>
+            <span>珠江四季悦城-19号楼...</span>
+            <i class="fas fa-chevron-right ml-1 mr-3"></i>
+            <div class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                99+
+            </div>
+        </div>
+    </div>
+
+    <!-- 搜索框 -->
+    <div class="px-4 py-3 bg-white">
+        <div class="flex items-center">
+            <div class="search-bar flex-1 mr-3">
+                <i class="fas fa-search mr-2"></i>
+                <span>魏家凉皮</span>
+            </div>
+            <button class="bg-yellow-400 text-black px-4 py-2 rounded-lg font-medium">搜索</button>
+        </div>
+    </div>
+
+    <!-- 分类图标 -->
+    <div class="bg-white py-4 flex justify-between px-2">
+        <div class="category">
+            <div class="category-icon bg-red-100">
+                <img src="https://images.pexels.com/photos/2611817/pexels-photo-2611817.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&dpr=2" class="w-6 h-6 rounded-full" alt="美团直送">
+            </div>
+            <span class="mt-1">美团直送</span>
+        </div>
+        <div class="category">
+            <div class="category-icon bg-yellow-50">
+                <img src="https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&dpr=2" class="w-6 h-6 rounded-full" alt="健康外卖">
+            </div>
+            <span class="mt-1">健康外卖</span>
+        </div>
+        <div class="category">
+            <div class="category-icon bg-blue-50">
+                <img src="https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&dpr=2" class="w-6 h-6 rounded-full" alt="超市便利">
+            </div>
+            <span class="mt-1">超市便利</span>
+        </div>
+        <div class="category">
+            <div class="category-icon bg-yellow-100">
+                <img src="https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&dpr=2" class="w-6 h-6 rounded-full" alt="咖啡奶茶">
+            </div>
+            <span class="mt-1">咖啡奶茶</span>
+        </div>
+        <div class="category">
+            <div class="category-icon bg-green-50">
+                <img src="https://images.pexels.com/photos/1211887/pexels-photo-1211887.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&dpr=2" class="w-6 h-6 rounded-full" alt="健康饮食">
+            </div>
+            <span class="mt-1 text-yellow-600 font-bold">健康饮食</span>
+        </div>
+    </div>
+    
+    <!-- 健康小贴士轮播 -->
+    <div class="mx-4 mt-3 bg-green-50 rounded-lg p-3 flex items-center">
+        <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white mr-2">
+            <i class="fas fa-leaf"></i>
+        </div>
+        <div class="flex-1">
+            <div class="text-sm font-bold text-green-800">健康小贴士</div>
+            <div class="text-xs text-green-600 mt-1">定制个人营养配餐，促进均衡健康饮食</div>
+        </div>
+        <button class="bg-green-500 text-white text-xs rounded-full px-3 py-1">了解更多</button>
+    </div>
+
+    <!-- 筛选条件 -->
+    <div class="filter mt-3">
+        <div class="filter-item">
+            <span>综合排序</span>
+            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+        </div>
+        <div class="filter-item">
+            <span>营养均衡</span>
+            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+        </div>
+        <div class="filter-item">
+            <span>热量区间</span>
+            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+        </div>
+        <div class="filter-item">
+            <span>筛选</span>
+            <i class="fas fa-filter ml-1 text-xs"></i>
+        </div>
+    </div>
+
+    <!-- 商家列表 -->
+    <div class="px-4 pb-16">
+        <!-- 商家1 -->
+        <div class="store-card">
+            <div class="flex p-3 items-start">
+                <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-3">
+                    <img src="https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-full object-cover" alt="商家图片">
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center">
+                        <span class="text-sm font-bold">健康轻食沙拉（四季悦城店）</span>
+                        <span class="ml-2 px-1 py-0.5 bg-orange-100 text-orange-500 text-xs rounded">堂食餐厅</span>
+                    </div>
+                    <div class="flex items-center mt-1 text-xs text-gray-500">
+                        <span class="flex items-center"><i class="fas fa-star text-yellow-400 mr-1"></i>4.8</span>
+                        <span class="mx-2">|</span>
+                        <span>月售3000+</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span>起送¥15</span>
+                            <span class="mx-2">|</span>
+                            <span>配送¥2</span>
+                            <span class="mx-2">|</span>
+                            <span>约30分钟</span>
+                        </div>
+                        <div class="text-xs">
+                            <span class="text-yellow-600">630m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 p-3">
+                <div class="flex justify-between mb-2">
+                    <div class="text-xs text-gray-700">推荐菜品</div>
+                    <div class="text-xs text-gray-500">热量/健康指数</div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-white rounded-lg p-2 relative">
+                        <img src="https://images.pexels.com/photos/1211887/pexels-photo-1211887.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-20 object-cover rounded-lg" alt="轻食沙拉">
+                        <div class="absolute top-1 right-1 bg-green-500 text-white text-xs rounded px-1">
+                            高蛋白
+                        </div>
+                        <div class="mt-1 text-xs font-bold truncate">牛油果轻食沙拉</div>
+                        <div class="mt-1 flex justify-between items-center">
+                            <div class="text-yellow-600 font-bold text-xs">¥29.9</div>
+                            <div class="text-xs px-1 py-0.5 bg-gray-100 rounded-sm">
+                                <span class="text-green-500 font-semibold">320kcal</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 relative">
+                        <img src="https://images.pexels.com/photos/1833349/pexels-photo-1833349.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-20 object-cover rounded-lg" alt="鸡胸肉沙拉">
+                        <div class="absolute top-1 right-1 bg-blue-500 text-white text-xs rounded px-1">
+                            低脂
+                        </div>
+                        <div class="mt-1 text-xs font-bold truncate">鸡胸肉蔬菜沙拉</div>
+                        <div class="mt-1 flex justify-between items-center">
+                            <div class="text-yellow-600 font-bold text-xs">¥32.8</div>
+                            <div class="text-xs px-1 py-0.5 bg-gray-100 rounded-sm">
+                                <span class="text-green-500 font-semibold">290kcal</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 relative">
+                        <img src="https://images.pexels.com/photos/361184/asparagus-steak-veal-steak-veal-361184.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-20 object-cover rounded-lg" alt="牛排">
+                        <div class="absolute top-1 right-1 bg-purple-500 text-white text-xs rounded px-1">
+                            营养均衡
+                        </div>
+                        <div class="mt-1 text-xs font-bold truncate">低脂牛排套餐</div>
+                        <div class="mt-1 flex justify-between items-center">
+                            <div class="text-yellow-600 font-bold text-xs">¥45.9</div>
+                            <div class="text-xs px-1 py-0.5 bg-gray-100 rounded-sm">
+                                <span class="text-orange-500 font-semibold">420kcal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 flex">
+                <div class="bg-yellow-50 text-yellow-600 text-xs rounded p-1 mr-2">
+                    <i class="fas fa-tag mr-1"></i>满30减10
+                </div>
+                <div class="bg-orange-50 text-orange-600 text-xs rounded p-1">
+                    <i class="fas fa-ticket-alt mr-1"></i>首单立减5元
+                </div>
+            </div>
+        </div>
+
+        <!-- 商家2 -->
+        <div class="store-card">
+            <div class="flex p-3 items-start">
+                <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-3">
+                    <img src="https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-full object-cover" alt="商家图片">
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center">
+                        <span class="text-sm font-bold">蛋白质工厂（珠江店）</span>
+                        <span class="ml-2 px-1 py-0.5 bg-orange-100 text-orange-500 text-xs rounded">堂食餐厅</span>
+                    </div>
+                    <div class="flex items-center mt-1 text-xs text-gray-500">
+                        <span class="flex items-center"><i class="fas fa-star text-yellow-400 mr-1"></i>4.7</span>
+                        <span class="mx-2">|</span>
+                        <span>月售2500+</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span>起送¥20</span>
+                            <span class="mx-2">|</span>
+                            <span>配送¥3</span>
+                            <span class="mx-2">|</span>
+                            <span>约25分钟</span>
+                        </div>
+                        <div class="text-xs">
+                            <span class="text-yellow-600">1.2km</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 p-3">
+                <div class="flex justify-between mb-2">
+                    <div class="text-xs text-gray-700">推荐菜品</div>
+                    <div class="text-xs text-gray-500">热量/健康指数</div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-white rounded-lg p-2 relative">
+                        <img src="https://images.pexels.com/photos/580612/pexels-photo-580612.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-20 object-cover rounded-lg" alt="蛋白餐">
+                        <div class="absolute top-1 right-1 bg-red-500 text-white text-xs rounded px-1">
+                            增肌
+                        </div>
+                        <div class="mt-1 text-xs font-bold truncate">高蛋白鸡胸餐</div>
+                        <div class="mt-1 flex justify-between items-center">
+                            <div class="text-yellow-600 font-bold text-xs">¥38.8</div>
+                            <div class="text-xs px-1 py-0.5 bg-gray-100 rounded-sm">
+                                <span class="text-yellow-500 font-semibold">380kcal</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 relative">
+                        <img src="https://images.pexels.com/photos/1640773/pexels-photo-1640773.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-20 object-cover rounded-lg" alt="低脂杂粮饭">
+                        <div class="absolute top-1 right-1 bg-yellow-500 text-white text-xs rounded px-1">
+                            高纤维
+                        </div>
+                        <div class="mt-1 text-xs font-bold truncate">低脂杂粮饭</div>
+                        <div class="mt-1 flex justify-between items-center">
+                            <div class="text-yellow-600 font-bold text-xs">¥25.9</div>
+                            <div class="text-xs px-1 py-0.5 bg-gray-100 rounded-sm">
+                                <span class="text-green-500 font-semibold">310kcal</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 relative">
+                        <img src="https://images.pexels.com/photos/8697539/pexels-photo-8697539.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-20 object-cover rounded-lg" alt="三文鱼">
+                        <div class="absolute top-1 right-1 bg-blue-400 text-white text-xs rounded px-1">
+                            欧米伽3
+                        </div>
+                        <div class="mt-1 text-xs font-bold truncate">清蒸三文鱼</div>
+                        <div class="mt-1 flex justify-between items-center">
+                            <div class="text-yellow-600 font-bold text-xs">¥48.8</div>
+                            <div class="text-xs px-1 py-0.5 bg-gray-100 rounded-sm">
+                                <span class="text-yellow-500 font-semibold">350kcal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 flex">
+                <div class="bg-yellow-50 text-yellow-600 text-xs rounded p-1 mr-2">
+                    <i class="fas fa-tag mr-1"></i>满50减15
+                </div>
+                <div class="bg-orange-50 text-orange-600 text-xs rounded p-1">
+                    <i class="fas fa-ticket-alt mr-1"></i>会员额外95折
+                </div>
+            </div>
+        </div>
+
+        <!-- 营养饮食周计划推荐 -->
+        <div class="bg-white rounded-lg p-4 mt-3">
+            <div class="flex items-center justify-between mb-3">
+                <div class="font-bold">营养饮食周计划</div>
+                <button class="text-xs text-yellow-600">查看更多</button>
+            </div>
+            <div class="bg-green-50 rounded-lg p-3">
+                <div class="text-sm font-bold text-green-800 mb-2">今日推荐: 轻断食日</div>
+                <div class="text-xs text-gray-600 mb-2">今天适合控制总热量，多补充蛋白质和膳食纤维</div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-white rounded-lg p-2 shadow-sm">
+                        <div class="text-xs font-bold mb-1">早餐</div>
+                        <div class="text-xs text-gray-600">水果沙拉 + 全麦面包</div>
+                        <div class="text-xs text-gray-400 mt-1">约280kcal</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm">
+                        <div class="text-xs font-bold mb-1">午餐</div>
+                        <div class="text-xs text-gray-600">鸡胸肉沙拉 + 杂粮饭</div>
+                        <div class="text-xs text-gray-400 mt-1">约450kcal</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm">
+                        <div class="text-xs font-bold mb-1">晚餐</div>
+                        <div class="text-xs text-gray-600">蒸鱼 + 时蔬</div>
+                        <div class="text-xs text-gray-400 mt-1">约350kcal</div>
+                    </div>
+                </div>
+                <button class="mt-3 bg-green-600 text-white text-xs rounded-full py-2 w-full">一键下单今日套餐</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI智能助手 -->
+    <div class="ai-assistant">
+        <div class="ai-avatar" onclick="toggleAiChat()">
+            <i class="fas fa-robot"></i>
+            <div class="ai-notification-badge" id="aiBadge">3</div>
+        </div>
+        
+        <div class="ai-chat-panel" id="aiChatPanel">
+            <div class="ai-header">
+                <button class="ai-close" onclick="toggleAiChat()">×</button>
+                <div class="flex items-center">
+                    <i class="fas fa-robot mr-2"></i>
+                    <div>
+                        <div class="font-bold">美团AI助手</div>
+                        <div class="text-xs opacity-80">智能生活管家</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-messages" id="aiMessages">
+                <div class="ai-message warning">
+                    <i class="ai-icon">⚠️</i>
+                    您已经连续3天点红烧肉了，建议搭配些清淡菜品，营养更均衡哦～
+                </div>
+                
+                <div class="ai-message offer">
+                    <i class="ai-icon">🎉</i>
+                    您最爱的麻辣香锅今天特价！原价¥32，现在只要¥25，还有15分钟结束。
+                </div>
+                
+                <div class="ai-message location">
+                    <i class="ai-icon">📍</i>
+                    检测到您在西湖景区，这里的叫花鸡和龙井虾仁是必吃美食！要不要试试？
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="tab-bar">
+        <div class="tab-item active">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-ticket-alt"></i>
+            <span>神券</span>
+        </div>
+        <div class="tab-item center">
+            <div class="center-icon">
+                <i class="fas fa-expand-alt"></i>
+            </div>
+            <span>膨胀</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-list-alt"></i>
+            <span>订单</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <script>
+        let aiChatOpen = false;
+        let messageCount = 0;
+
+        // 切换AI聊天面板
+        function toggleAiChat() {
+            const panel = document.getElementById('aiChatPanel');
+            const badge = document.getElementById('aiBadge');
+            
+            aiChatOpen = !aiChatOpen;
+            
+            if (aiChatOpen) {
+                panel.classList.add('active');
+                badge.style.display = 'none';
+            } else {
+                panel.classList.remove('active');
+            }
+        }
+
+        // AI智能提醒消息模板
+        const aiMessages = [
+            {
+                type: 'warning',
+                icon: '⚠️',
+                text: '您本周已经点了5次川菜，建议尝试一下粤菜或淮扬菜，平衡口味更健康！'
+            },
+            {
+                type: 'recommendation',
+                icon: '🍜',
+                text: '根据您的口味偏好，推荐试试新开的"老北京炸酱面"，评分4.8分，距离您500米。'
+            },
+            {
+                type: 'offer',
+                icon: '💰',
+                text: '您常点的"蒜蓉生菜"现在买二送一！还有20份库存，要抓紧哦～'
+            },
+            {
+                type: 'location',
+                icon: '🗺️',
+                text: '检测到您在朝阳公园附近，这里的"老北京涮羊肉"和"烤鸭"是当地特色！'
+            },
+            {
+                type: 'warning',
+                icon: '🥤',
+                text: '您今天还没有点饮品呢，来杯鲜榨果汁补充维生素吧！'
+            },
+            {
+                type: 'recommendation',
+                icon: '🏃',
+                text: '刚运动完？推荐低脂高蛋白餐：鸡胸肉沙拉+牛油果，助您快速恢复！'
+            },
+            {
+                type: 'offer',
+                icon: '⏰',
+                text: '午餐时间到了！您的专属优惠券还有2小时过期，记得使用哦～'
+            },
+            {
+                type: 'location',
+                icon: '🎭',
+                text: '您在三里屯！这里的fusion料理和网红甜品超棒，要不要尝鲜？'
+            },
+            {
+                type: 'warning',
+                icon: '🥗',
+                text: '您这周的蔬菜摄入量偏低，推荐来份彩虹沙拉，营养丰富又美味！'
+            },
+            {
+                type: 'recommendation',
+                icon: '🌙',
+                text: '夜宵时间！推荐清淡易消化的小馄饨或蒸蛋羹，对肠胃更好哦～'
+            }
+        ];
+
+        // 随机显示AI提醒
+        function showRandomAiMessage() {
+            const messagesContainer = document.getElementById('aiMessages');
+            const badge = document.getElementById('aiBadge');
+            
+            if (messageCount < aiMessages.length) {
+                const randomMessage = aiMessages[Math.floor(Math.random() * aiMessages.length)];
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = `ai-message ${randomMessage.type}`;
+                messageElement.innerHTML = `
+                    <i class="ai-icon">${randomMessage.icon}</i>
+                    ${randomMessage.text}
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+                messageCount++;
+                
+                // 更新通知徽章
+                if (!aiChatOpen) {
+                    badge.style.display = 'flex';
+                    badge.textContent = messageCount > 9 ? '9+' : messageCount;
+                }
+                
+                // 自动滚动到最新消息
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // 如果消息太多，移除旧消息
+                if (messagesContainer.children.length > 8) {
+                    messagesContainer.removeChild(messagesContainer.firstChild);
+                }
+            }
+        }
+
+        // 基于时间的智能提醒
+        function timeBasedReminders() {
+            const now = new Date();
+            const hour = now.getHours();
+            const messagesContainer = document.getElementById('aiMessages');
+            
+            let timeMessage = '';
+            
+            if (hour >= 7 && hour < 9) {
+                timeMessage = {
+                    type: 'recommendation',
+                    icon: '🌅',
+                    text: '早安！营养早餐很重要，推荐来份豆浆油条或小笼包，开启美好一天！'
+                };
+            } else if (hour >= 11 && hour < 14) {
+                timeMessage = {
+                    type: 'recommendation',
+                    icon: '☀️',
+                    text: '午餐时间到！推荐营养搭配：主食+蛋白质+蔬菜，能量满满下午不困！'
+                };
+            } else if (hour >= 17 && hour < 19) {
+                timeMessage = {
+                    type: 'recommendation',
+                    icon: '🌆',
+                    text: '晚餐时光～建议选择清淡易消化的食物，有助睡眠质量哦！'
+                };
+            } else if (hour >= 21 && hour < 23) {
+                timeMessage = {
+                    type: 'warning',
+                    icon: '🌙',
+                    text: '夜深了，如果要点夜宵，建议选择清粥、汤品等温和食物！'
+                };
+            }
+            
+            if (timeMessage) {
+                const messageElement = document.createElement('div');
+                messageElement.className = `ai-message ${timeMessage.type}`;
+                messageElement.innerHTML = `
+                    <i class="ai-icon">${timeMessage.icon}</i>
+                    ${timeMessage.text}
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        // 地理位置相关提醒（模拟）
+        function locationBasedReminders() {
+            const locations = [
+                {
+                    name: '故宫',
+                    food: '老北京炸酱面和豆汁焦圈',
+                    icon: '🏛️'
+                },
+                {
+                    name: '外滩',
+                    food: '本帮菜和小笼包',
+                    icon: '🌃'
+                },
+                {
+                    name: '春熙路',
+                    food: '火锅和串串香',
+                    icon: '🌶️'
+                },
+                {
+                    name: '西湖',
+                    food: '西湖醋鱼和龙井虾仁',
+                    icon: '🏞️'
+                }
+            ];
+            
+            // 随机模拟位置
+            const randomLocation = locations[Math.floor(Math.random() * locations.length)];
+            
+            const messagesContainer = document.getElementById('aiMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'ai-message location';
+            messageElement.innerHTML = `
+                <i class="ai-icon">${randomLocation.icon}</i>
+                检测到您在${randomLocation.name}附近，这里的${randomLocation.food}是必吃美食！要不要试试？
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 初始化AI助手
+        function initAiAssistant() {
+            // 页面加载后3秒显示时间提醒
+            setTimeout(timeBasedReminders, 3000);
+            
+            // 每隔20-40秒随机显示提醒
+            setInterval(() => {
+                const randomDelay = Math.random() * 20000 + 20000; // 20-40秒
+                setTimeout(showRandomAiMessage, randomDelay);
+            }, 30000);
+            
+            // 每隔60秒检查位置提醒
+            setInterval(locationBasedReminders, 60000);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initAiAssistant);
+
+        // 点击页面其他地方关闭AI面板
+        document.addEventListener('click', function(event) {
+            const aiAssistant = document.querySelector('.ai-assistant');
+            const aiChatPanel = document.getElementById('aiChatPanel');
+            
+            if (!aiAssistant.contains(event.target) && aiChatOpen) {
+                aiChatPanel.classList.remove('active');
+                aiChatOpen = false;
+            }
+        });
+    </script>
+</body>
+</html> 

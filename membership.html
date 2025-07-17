@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美团外卖 - 会员权益</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            user-select: none;
+        }
+        
+        /* 隐藏所有滚动条 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        * {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .status-bar {
+            background-color: #FFD100;
+            height: 44px;
+            color: black;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .nav-bar {
+            background-color: white;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 16px;
+            font-weight: bold;
+            position: relative;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background-color: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-top: 10px;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #999;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .tab-item.active {
+            color: #ff6b35;
+        }
+        .tab-item i {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+        .tab-item.center {
+            position: relative;
+            top: -15px;
+        }
+        .tab-item.center .center-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #FFD100, #FF8C00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(255, 209, 0, 0.3);
+            border: 3px solid white;
+        }
+        .tab-item.center .center-icon i {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 0;
+        }
+        .tab-item.center span {
+            margin-top: 5px;
+            font-size: 10px;
+        }
+        
+        /* AI助手样式 */
+        .ai-assistant {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .ai-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .ai-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(255, 215, 0, 0.4);
+        }
+        
+        .ai-avatar i {
+            color: white;
+            font-size: 24px;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3), 0 0 0 0 rgba(255, 215, 0, 0.4); }
+            70% { box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3), 0 0 0 10px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3), 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+        
+        .ai-chat-panel {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 300px;
+            max-height: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            transform: translateY(20px) scale(0.9);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .ai-chat-panel.active {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .ai-header {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            padding: 15px;
+            color: white;
+        }
+        
+        .ai-messages {
+            padding: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .ai-message {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .ai-message.warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left: 4px solid #f39c12;
+        }
+        
+        .ai-message.recommendation {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 4px solid #2196f3;
+        }
+        
+        .ai-message.offer {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            border-left: 4px solid #ff9800;
+        }
+        
+        .ai-message.vip {
+            background: linear-gradient(135deg, #ffd700, #ffecb3);
+            border-left: 4px solid #ffd700;
+        }
+        
+        .ai-message .ai-icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .ai-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .ai-notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .progress-chart {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+        .progress-circle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(#FFD100 0% 62.5%, #eee 62.5% 100%);
+        }
+        .progress-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 70%;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .platform-bar {
+            height: 20px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .platform-progress {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        .reward-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .reward-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+        }
+        .achievement-badge {
+            position: relative;
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(45deg, #FFD100, #FF9800);
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .achievement-badge::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 10px;
+            height: 10px;
+            background: #FF6B6B;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .countdown-timer {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .countdown-item {
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+                 .floating-coin {
+             position: absolute;
+             width: 30px;
+             height: 30px;
+             background: #FFD100;
+             border-radius: 50%;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             color: white;
+             font-weight: bold;
+             animation: floatCoin 3s ease-in-out infinite;
+         }
+        @keyframes floatCoin {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="flex items-center">
+            <span>22:45</span>
+            <img src="https://images.pexels.com/photos/1493226/pexels-photo-1493226.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&dpr=2" class="w-5 h-5 ml-1 rounded-full" alt="微信">
+        </div>
+        <div class="flex items-center">
+            <span class="mr-1">5G</span>
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi ml-1"></i>
+            <i class="fas fa-battery-full ml-1"></i>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <div class="nav-bar">
+        <button class="absolute left-4">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="flex-1 text-center">会员权益</div>
+        <div class="flex items-center">
+            <button class="ml-4">
+                <i class="fas fa-question-circle"></i>
+            </button>
+            <button class="ml-4">
+                <i class="fas fa-gift"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 周期进度主卡片 -->
+    <div class="mx-4 mt-4 bg-white rounded-lg p-6 relative">
+        <div class="floating-coin" style="top: 20px; right: 30px; animation-delay: 0s;">¥</div>
+        <div class="floating-coin" style="top: 60px; right: 50px; animation-delay: 1.5s;">¥</div>
+        
+        <div class="text-center mb-6">
+            <h2 class="text-xl font-bold mb-2">本周期免单挑战</h2>
+            <p class="text-gray-600 text-sm">连续20个工作日，达成条件即可获得免单奖励</p>
+        </div>
+
+        <div class="progress-chart">
+            <div class="progress-circle"></div>
+            <div class="progress-inner">
+                <div class="text-3xl font-bold text-yellow-600">10/8</div>
+                <div class="text-sm text-gray-500">已达标</div>
+                <div class="text-xs text-gray-400 mt-1">目标8次</div>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+            <div class="achievement-badge">
+                🎉 恭喜达成免单条件！
+            </div>
+        </div>
+
+        <!-- 倒计时 -->
+        <div class="mt-6">
+            <div class="text-sm text-gray-600 text-center mb-2">距离周期结束还有</div>
+            <div class="countdown-timer">
+                <div class="countdown-item">
+                    <div class="text-lg font-bold text-yellow-600">6</div>
+                    <div class="text-xs text-gray-500">天</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="text-lg font-bold text-yellow-600">14</div>
+                    <div class="text-xs text-gray-500">时</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="text-lg font-bold text-yellow-600">32</div>
+                    <div class="text-xs text-gray-500">分</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="text-lg font-bold text-yellow-600">18</div>
+                    <div class="text-xs text-gray-500">秒</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单占比统计 -->
+    <div class="mx-4 mt-4 bg-white rounded-lg p-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg">平台订单占比</h3>
+            <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">美团领先</span>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 bg-yellow-400 rounded mr-2"></div>
+                        <span class="font-bold">美团外卖</span>
+                    </div>
+                    <span class="font-bold text-yellow-600">65%</span>
+                </div>
+                <div class="platform-bar bg-gray-200">
+                    <div class="platform-progress bg-yellow-400" style="width: 65%;"></div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">本周期：10次订单</div>
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 bg-blue-400 rounded mr-2"></div>
+                        <span>其他平台A</span>
+                    </div>
+                    <span class="text-gray-600">20%</span>
+                </div>
+                <div class="platform-bar bg-gray-200">
+                    <div class="platform-progress bg-blue-400" style="width: 20%;"></div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">本周期：3次订单</div>
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 bg-red-400 rounded mr-2"></div>
+                        <span>其他平台B</span>
+                    </div>
+                    <span class="text-gray-600">15%</span>
+                </div>
+                <div class="platform-bar bg-gray-200">
+                    <div class="platform-progress bg-red-400" style="width: 15%;"></div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">本周期：2次订单</div>
+            </div>
+        </div>
+
+        <div class="mt-4 p-3 bg-green-50 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-trophy text-green-600 mr-2"></i>
+                <span class="text-sm text-green-800 font-bold">您在美团外卖的占比已达65%，超过其他平台！</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 奖励预览 -->
+    <div class="mx-4 mt-4">
+        <div class="reward-card">
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold">恭喜获得免单奖励！</h3>
+                        <p class="text-white text-opacity-90 text-sm">满足条件，为您准备了丰厚奖励</p>
+                    </div>
+                    <div class="text-4xl">🎁</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold">¥50</div>
+                        <div class="text-white text-opacity-80 text-xs">免单券</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold">3张</div>
+                        <div class="text-white text-opacity-80 text-xs">专属优惠券</div>
+                    </div>
+                </div>
+
+                <button class="w-full bg-white text-purple-600 py-3 rounded-lg font-bold">
+                    立即领取奖励
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 会员特权 -->
+    <div class="mx-4 mt-4 bg-white rounded-lg p-4">
+        <h3 class="font-bold text-lg mb-4">专属会员特权</h3>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                <div class="text-2xl mb-2">🚚</div>
+                <div class="text-sm font-bold">优先配送</div>
+                <div class="text-xs text-gray-500 mt-1">配送优先级提升</div>
+            </div>
+            
+            <div class="text-center p-4 bg-blue-50 rounded-lg">
+                <div class="text-2xl mb-2">💰</div>
+                <div class="text-sm font-bold">专属折扣</div>
+                <div class="text-xs text-gray-500 mt-1">额外会员价格</div>
+            </div>
+            
+            <div class="text-center p-4 bg-green-50 rounded-lg">
+                <div class="text-2xl mb-2">🎯</div>
+                <div class="text-sm font-bold">个性推荐</div>
+                <div class="text-xs text-gray-500 mt-1">AI智能推荐</div>
+            </div>
+            
+            <div class="text-center p-4 bg-purple-50 rounded-lg">
+                <div class="text-2xl mb-2">🛡️</div>
+                <div class="text-sm font-bold">骑士装扮</div>
+                <div class="text-xs text-gray-500 mt-1">专属骑士卡</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史成就 -->
+    <div class="mx-4 mt-4 mb-32 bg-white rounded-lg p-4">
+        <h3 class="font-bold text-lg mb-4">历史成就</h3>
+        
+        <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-medal text-white"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm">第3周期达成</div>
+                        <div class="text-xs text-gray-500">2024年2月</div>
+                    </div>
+                </div>
+                <div class="text-yellow-600 font-bold">已领取</div>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-star text-white"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm">第2周期达成</div>
+                        <div class="text-xs text-gray-500">2024年1月</div>
+                    </div>
+                </div>
+                <div class="text-yellow-600 font-bold">已领取</div>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-trophy text-white"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm">首次达成</div>
+                        <div class="text-xs text-gray-500">2023年12月</div>
+                    </div>
+                </div>
+                <div class="text-yellow-600 font-bold">已领取</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI智能助手 -->
+    <div class="ai-assistant">
+        <div class="ai-avatar" onclick="toggleAiChat()">
+            <i class="fas fa-crown"></i>
+            <div class="ai-notification-badge" id="aiBadge">3</div>
+        </div>
+        
+        <div class="ai-chat-panel" id="aiChatPanel">
+            <div class="ai-header">
+                <button class="ai-close" onclick="toggleAiChat()">×</button>
+                <div class="flex items-center">
+                    <i class="fas fa-crown mr-2"></i>
+                    <div>
+                        <div class="font-bold">VIP专享助手</div>
+                        <div class="text-xs opacity-80">为您提供尊享服务</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-messages" id="aiMessages">
+                <div class="ai-message vip">
+                    <i class="ai-icon">👑</i>
+                    恭喜！您的VIP等级即将升级，还差2次订单就能享受更多特权！
+                </div>
+                
+                <div class="ai-message offer">
+                    <i class="ai-icon">💎</i>
+                    专属福利：本月VIP用户可享受全场免配送费，还有30天有效期！
+                </div>
+                
+                <div class="ai-message recommendation">
+                    <i class="ai-icon">🎁</i>
+                    您的生日月即将到来，准备了专属生日礼包，记得来领取哦～
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="tab-bar">
+        <div class="tab-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-ticket-alt"></i>
+            <span>神券</span>
+        </div>
+        <div class="tab-item center">
+            <div class="center-icon">
+                <i class="fas fa-expand-alt"></i>
+            </div>
+            <span>膨胀</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-list-alt"></i>
+            <span>订单</span>
+        </div>
+        <div class="tab-item active">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <script>
+        let aiChatOpen = false;
+        let messageCount = 3;
+
+        function toggleAiChat() {
+            const panel = document.getElementById('aiChatPanel');
+            const badge = document.getElementById('aiBadge');
+            aiChatOpen = !aiChatOpen;
+            if (aiChatOpen) {
+                panel.classList.add('active');
+                badge.style.display = 'none';
+            } else {
+                panel.classList.remove('active');
+            }
+        }
+
+        const vipAiMessages = [
+            {
+                type: 'vip',
+                icon: '💎',
+                text: '尊贵的钻石会员！本周您可享受专属5折优惠，仅限今日！'
+            },
+            {
+                type: 'offer',
+                icon: '🎯',
+                text: '您的会员积分即将过期，兑换美食券可延长有效期至明年！'
+            },
+            {
+                type: 'recommendation',
+                icon: '👑',
+                text: '恭喜升级！新等级解锁专属客服通道，24小时为您服务！'
+            },
+            {
+                type: 'vip',
+                icon: '🌟',
+                text: '本月消费达标可获得限量版会员徽章，快来完成最后一单！'
+            }
+        ];
+
+        function showVipAiMessage() {
+            const messagesContainer = document.getElementById('aiMessages');
+            if (messageCount < 8) {
+                const randomMessage = vipAiMessages[Math.floor(Math.random() * vipAiMessages.length)];
+                const messageElement = document.createElement('div');
+                messageElement.className = `ai-message ${randomMessage.type}`;
+                messageElement.innerHTML = `<i class="ai-icon">${randomMessage.icon}</i>${randomMessage.text}`;
+                messagesContainer.appendChild(messageElement);
+                messageCount++;
+                if (messagesContainer.children.length > 6) {
+                    messagesContainer.removeChild(messagesContainer.firstChild);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setInterval(showVipAiMessage, 35000);
+        });
+
+        document.addEventListener('click', function(event) {
+            const aiAssistant = document.querySelector('.ai-assistant');
+            if (!aiAssistant.contains(event.target) && aiChatOpen) {
+                document.getElementById('aiChatPanel').classList.remove('active');
+                aiChatOpen = false;
+            }
+        });
+    </script>
+</body>
+</html> 

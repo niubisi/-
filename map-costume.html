@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配送地图 - 装扮特效</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            overflow: hidden;
+        }
+
+        /* iPhone状态栏 */
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 地图头部 */
+        .map-header {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .location-btn {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* 地图区域 */
+        .map-container {
+            position: relative;
+            height: calc(100vh - 44px - 60px - 180px);
+            background: linear-gradient(135deg, #b2dfdb 0%, #80cbc4 30%, #4db6ac  60%, #26a69a 100%);
+            overflow: hidden;
+        }
+
+        /* 地图道路背景 */
+        .map-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(90deg, rgba(255,255,255,0.3) 2px, transparent 2px),
+                linear-gradient(180deg, rgba(255,255,255,0.3) 2px, transparent 2px);
+            background-size: 40px 40px;
+            animation: roadMove 20s linear infinite;
+        }
+
+        @keyframes roadMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+
+        /* 建筑物 */
+        .buildings {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+        }
+
+        .building {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 8px;
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+        }
+
+        .building1 { top: 50px; left: 30px; width: 60px; height: 40px; }
+        .building2 { top: 30px; right: 50px; width: 80px; height: 50px; }
+        .building3 { bottom: 80px; left: 60px; width: 70px; height: 45px; }
+        .building4 { bottom: 60px; right: 40px; width: 65px; height: 35px; }
+
+        /* 骑手位置 */
+        .rider-position {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+        }
+
+        .rider-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+            animation: riderMove 3s ease-in-out infinite;
+        }
+
+        @keyframes riderMove {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* 装扮特效 */
+        .costume-effects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .ninja-effect {
+            background: radial-gradient(circle, rgba(44, 62, 80, 0.3) 0%, transparent 70%);
+            animation: ninjaGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes ninjaGlow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.2); }
+        }
+
+        .knight-effect {
+            background: radial-gradient(circle, rgba(243, 156, 18, 0.4) 0%, transparent 70%);
+            animation: knightShine 2.5s ease-in-out infinite;
+        }
+
+        @keyframes knightShine {
+            0%, 100% { opacity: 0.6; transform: scale(1) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.3) rotate(180deg); }
+        }
+
+        .cyber-effect {
+            background: radial-gradient(circle, rgba(155, 89, 182, 0.4) 0%, transparent 70%);
+            animation: cyberPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes cyberPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.7); }
+            50% { opacity: 0.7; transform: scale(1.4); box-shadow: 0 0 0 20px rgba(155, 89, 182, 0); }
+        }
+
+        .flame-effect {
+            background: radial-gradient(circle, rgba(231, 76, 60, 0.4) 0%, transparent 70%);
+            animation: flameFlicker 1s ease-in-out infinite;
+        }
+
+        @keyframes flameFlicker {
+            0%, 100% { opacity: 0.7; transform: scale(1.1) rotate(-5deg); }
+            25% { opacity: 0.9; transform: scale(1.3) rotate(5deg); }
+            50% { opacity: 0.6; transform: scale(1.2) rotate(-3deg); }
+            75% { opacity: 0.8; transform: scale(1.4) rotate(3deg); }
+        }
+
+        .ice-effect {
+            background: radial-gradient(circle, rgba(52, 152, 219, 0.4) 0%, transparent 70%);
+            animation: iceFreeze 3s ease-in-out infinite;
+        }
+
+        @keyframes iceFreeze {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            33% { opacity: 0.8; transform: scale(1.2); }
+            66% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .royal-effect {
+            background: radial-gradient(circle, rgba(241, 196, 15, 0.5) 0%, transparent 70%);
+            animation: royalMajesty 4s ease-in-out infinite;
+        }
+
+        @keyframes royalMajesty {
+            0%, 100% { opacity: 0.6; transform: scale(1) rotate(0deg); }
+            25% { opacity: 1; transform: scale(1.4) rotate(90deg); }
+            50% { opacity: 0.8; transform: scale(1.3) rotate(180deg); }
+            75% { opacity: 0.9; transform: scale(1.5) rotate(270deg); }
+        }
+
+        /* 粒子特效 */
+        .particles {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: particleFloat 3s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { top: 30%; right: 15%; animation-delay: 0.5s; }
+        .particle:nth-child(3) { bottom: 25%; left: 20%; animation-delay: 1s; }
+        .particle:nth-child(4) { bottom: 35%; right: 10%; animation-delay: 1.5s; }
+        .particle:nth-child(5) { top: 40%; left: 50%; animation-delay: 2s; }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0px) scale(0.5); opacity: 0; }
+            50% { transform: translateY(-30px) scale(1); opacity: 1; }
+        }
+
+        /* 配送状态卡片 */
+        .delivery-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            min-width: 200px;
+            z-index: 60;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .status-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .gift-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .costume-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            border-radius: 10px;
+        }
+
+        .costume-icon {
+            font-size: 20px;
+        }
+
+        .costume-details {
+            flex: 1;
+        }
+
+        .costume-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .costume-cycles {
+            font-size: 11px;
+            color: #667eea;
+            margin-top: 2px;
+        }
+
+        .earnings-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .earnings-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .earnings-amount {
+            font-size: 12px;
+            font-weight: 600;
+            color: #27ae60;
+        }
+
+        /* 底部控制面板 */
+        .bottom-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .delivery-progress {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+        }
+
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .step-icon.completed {
+            background: #27ae60;
+            color: white;
+        }
+
+        .step-icon.current {
+            background: #667eea;
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .step-icon.pending {
+            background: #ddd;
+            color: #999;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .step-label {
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+        }
+
+        .progress-line {
+            height: 2px;
+            background: #ddd;
+            flex: 1;
+            margin: 0 10px;
+            position: relative;
+            top: -12px;
+        }
+
+        .progress-line.completed {
+            background: #27ae60;
+        }
+
+        .delivery-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delivery-distance {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .delivery-time {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .tip-again-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tip-again-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* 弹出通知 */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            max-width: 280px;
+            transform: translateX(300px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 200;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .notification-icon {
+            font-size: 20px;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .notification-content {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* 收益动画 */
+        .earnings-popup {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+            animation: earningsFloat 3s ease-out forwards;
+            z-index: 80;
+        }
+
+        @keyframes earningsFloat {
+            0% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            20% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% { 
+                opacity: 0;
+                transform: translate(-50%, -150%) scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- iPhone状态栏 -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span>中国移动</span>
+            <span>📶</span>
+        </div>
+        <div>14:25</div>
+        <div class="status-right">
+            <span>🔋 87%</span>
+        </div>
+    </div>
+
+    <!-- 地图头部 -->
+    <div class="map-header">
+        <div class="header-left">
+            <div>
+                <div class="header-title">配送中</div>
+                <div class="header-subtitle">预计15分钟送达</div>
+            </div>
+        </div>
+        <div class="location-btn">
+            <span>📍</span>
+            <span>我的位置</span>
+        </div>
+    </div>
+
+    <!-- 地图容器 -->
+    <div class="map-container">
+        <!-- 地图背景 -->
+        <div class="map-background"></div>
+
+        <!-- 建筑物 -->
+        <div class="buildings">
+            <div class="building building1">🏢<br>写字楼</div>
+            <div class="building building2">🏪<br>便利店</div>
+            <div class="building building3">🏠<br>住宅区</div>
+            <div class="building building4">🍕<br>餐厅</div>
+        </div>
+
+        <!-- 骑手位置 -->
+        <div class="rider-position">
+            <div class="rider-avatar" id="rider-avatar">
+                🏍️
+            </div>
+            <!-- 装扮特效层 -->
+            <div class="costume-effects" id="costume-effects"></div>
+            
+            <!-- 粒子特效 -->
+            <div class="particles" id="particles"></div>
+        </div>
+
+        <!-- 配送状态卡片 -->
+        <div class="delivery-status">
+            <div class="status-header">
+                <span class="status-title">装扮状态</span>
+                <span class="gift-badge">您赠送</span>
+            </div>
+            
+            <div class="costume-info" id="costume-info">
+                <div class="costume-icon" id="status-costume-icon">🥷</div>
+                <div class="costume-details">
+                    <div class="costume-name" id="status-costume-name">忍者装扮</div>
+                    <div class="costume-cycles" id="status-cycles">剩余 5/7 次</div>
+                </div>
+            </div>
+
+            <div class="earnings-info">
+                <span class="earnings-label">本次收益</span>
+                <span class="earnings-amount" id="current-earnings">+¥1.0</span>
+            </div>
+        </div>
+
+        <!-- 收益弹出动画 -->
+        <div class="earnings-popup" id="earnings-popup" style="display: none;">
+            +¥1.0 已到账
+        </div>
+    </div>
+
+    <!-- 底部控制面板 -->
+    <div class="bottom-panel">
+        <div class="delivery-progress">
+            <div class="progress-step">
+                <div class="step-icon completed">✓</div>
+                <div class="step-label">商家接单</div>
+            </div>
+            <div class="progress-line completed"></div>
+            
+            <div class="progress-step">
+                <div class="step-icon completed">✓</div>
+                <div class="step-label">制作完成</div>
+            </div>
+            <div class="progress-line completed"></div>
+            
+            <div class="progress-step">
+                <div class="step-icon current">🚚</div>
+                <div class="step-label">配送中</div>
+            </div>
+            <div class="progress-line pending"></div>
+            
+            <div class="progress-step">
+                <div class="step-icon pending">📍</div>
+                <div class="step-label">送达</div>
+            </div>
+        </div>
+
+        <div class="delivery-info">
+            <div>
+                <div class="delivery-distance">距离您 <span id="distance">1.2km</span></div>
+                <div class="delivery-time">预计 <span id="time">12分钟</span> 送达</div>
+            </div>
+            <button class="tip-again-btn" onclick="showTipAgain()">再次打赏</button>
+        </div>
+    </div>
+
+    <!-- 通知弹窗 -->
+    <div class="notification" id="notification">
+        <div class="notification-header">
+            <span class="notification-icon">💰</span>
+            <span class="notification-title">装扮收益到账</span>
+        </div>
+        <div class="notification-content" id="notification-content">
+            装扮使用次数-1，¥1.0已发送给骑手
+        </div>
+    </div>
+
+    <script>
+        // 装扮配置
+        const costumes = {
+            ninja: {
+                icon: '🥷',
+                name: '忍者装扮',
+                effect: 'ninja-effect',
+                particles: ['#2c3e50', '#34495e'],
+                price: 1.0,
+                remainingCycles: 5,
+                totalCycles: 7
+            },
+            knight: {
+                icon: '⚔️',
+                name: '骑士装扮',
+                effect: 'knight-effect',
+                particles: ['#f39c12', '#e67e22'],
+                price: 1.8,
+                remainingCycles: 6,
+                totalCycles: 7
+            },
+            cyber: {
+                icon: '🤖',
+                name: '赛博装扮',
+                effect: 'cyber-effect',
+                particles: ['#9b59b6', '#8e44ad'],
+                price: 1.4,
+                remainingCycles: 4,
+                totalCycles: 7
+            },
+            flame: {
+                icon: '🔥',
+                name: '烈焰装扮',
+                effect: 'flame-effect',
+                particles: ['#e74c3c', '#c0392b'],
+                price: 1.2,
+                remainingCycles: 3,
+                totalCycles: 7
+            },
+            ice: {
+                icon: '❄️',
+                name: '冰霜装扮',
+                effect: 'ice-effect',
+                particles: ['#3498db', '#2980b9'],
+                price: 1.5,
+                remainingCycles: 7,
+                totalCycles: 7
+            },
+            royal: {
+                icon: '👑',
+                name: '皇家装扮',
+                effect: 'royal-effect',
+                particles: ['#f1c40f', '#e67e22'],
+                price: 4.0,
+                remainingCycles: 2,
+                totalCycles: 7
+            }
+        };
+
+        let currentCostume = 'ninja';
+        let deliveryCount = 0;
+
+        // 更新装扮显示
+        function updateCostumeDisplay(costumeKey) {
+            const costume = costumes[costumeKey];
+            const riderAvatar = document.getElementById('rider-avatar');
+            const costumeEffects = document.getElementById('costume-effects');
+            const statusIcon = document.getElementById('status-costume-icon');
+            const statusName = document.getElementById('status-costume-name');
+            const statusCycles = document.getElementById('status-cycles');
+            const currentEarnings = document.getElementById('current-earnings');
+
+            // 更新骑手图标
+            riderAvatar.innerHTML = costume.icon;
+
+            // 更新特效
+            costumeEffects.className = `costume-effects ${costume.effect}`;
+
+            // 更新状态卡片
+            statusIcon.textContent = costume.icon;
+            statusName.textContent = costume.name;
+            statusCycles.textContent = `剩余 ${costume.remainingCycles}/${costume.totalCycles} 次`;
+            currentEarnings.textContent = `+¥${costume.price.toFixed(1)}`;
+
+            // 更新粒子特效
+            updateParticles(costume.particles);
+        }
+
+        // 更新粒子特效
+        function updateParticles(colors) {
+            const particles = document.getElementById('particles');
+            particles.innerHTML = '';
+
+            colors.forEach((color, index) => {
+                for (let i = 0; i < 3; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.backgroundColor = color;
+                    particle.style.top = `${20 + index * 20 + i * 10}%`;
+                    particle.style.left = `${10 + i * 25}%`;
+                    particle.style.animationDelay = `${i * 0.5 + index * 0.3}s`;
+                    particles.appendChild(particle);
+                }
+            });
+        }
+
+        // 模拟配送完成
+        function simulateDelivery() {
+            const costume = costumes[currentCostume];
+            if (costume.remainingCycles <= 0) {
+                return; // 次数用完了
+            }
+
+            // 扣除次数
+            costume.remainingCycles--;
+
+            // 显示收益弹出
+            showEarningsPopup(costume.price);
+
+            // 更新显示
+            updateCostumeDisplay(currentCostume);
+
+            // 显示通知
+            showNotification(costume.name, costume.price);
+
+            // 如果次数用完，切换到下一个装扮
+            if (costume.remainingCycles <= 0) {
+                setTimeout(() => {
+                    switchToNextCostume();
+                }, 2000);
+            }
+        }
+
+        // 显示收益弹出
+        function showEarningsPopup(amount) {
+            const popup = document.getElementById('earnings-popup');
+            popup.textContent = `+¥${amount.toFixed(1)} 已到账`;
+            popup.style.display = 'block';
+            popup.style.animation = 'none';
+            
+            setTimeout(() => {
+                popup.style.animation = 'earningsFloat 3s ease-out forwards';
+            }, 50);
+
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 3000);
+        }
+
+        // 显示通知
+        function showNotification(costumeName, amount) {
+            const notification = document.getElementById('notification');
+            const content = document.getElementById('notification-content');
+            
+            content.textContent = `"${costumeName}"使用次数-1，¥${amount.toFixed(1)}已发送给骑手`;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // 切换到下一个装扮
+        function switchToNextCostume() {
+            const costumeKeys = Object.keys(costumes);
+            const availableCostumes = costumeKeys.filter(key => costumes[key].remainingCycles > 0);
+            
+            if (availableCostumes.length === 0) {
+                // 所有装扮都用完了
+                showAllCostumesUsedNotification();
+                return;
+            }
+
+            // 随机选择一个有剩余次数的装扮
+            const nextCostume = availableCostumes[Math.floor(Math.random() * availableCostumes.length)];
+            currentCostume = nextCostume;
+            updateCostumeDisplay(currentCostume);
+        }
+
+        // 显示所有装扮用完的通知
+        function showAllCostumesUsedNotification() {
+            const notification = document.getElementById('notification');
+            const content = document.getElementById('notification-content');
+            
+            content.textContent = '所有装扮次数已用完，感谢您的支持！可以再次购买装扮。';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // 再次打赏
+        function showTipAgain() {
+            alert('正在跳转到装扮商店...\n您可以为骑手购买更多装扮或礼物！');
+        }
+
+        // 自动装扮切换演示
+        function startCostumeDemo() {
+            const costumeKeys = Object.keys(costumes);
+            let currentIndex = 0;
+
+            setInterval(() => {
+                currentCostume = costumeKeys[currentIndex];
+                updateCostumeDisplay(currentCostume);
+                currentIndex = (currentIndex + 1) % costumeKeys.length;
+            }, 8000);
+        }
+
+        // 模拟配送进度更新
+        function updateDeliveryProgress() {
+            const distanceElement = document.getElementById('distance');
+            const timeElement = document.getElementById('time');
+            
+            let distance = 1.2;
+            let time = 12;
+            
+            setInterval(() => {
+                distance = Math.max(0.1, distance - 0.1);
+                time = Math.max(1, time - 1);
+                
+                distanceElement.textContent = distance.toFixed(1) + 'km';
+                timeElement.textContent = time + '分钟';
+                
+                // 每次更新都有概率触发配送完成
+                if (Math.random() < 0.1) {
+                    simulateDelivery();
+                }
+            }, 2000);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCostumeDisplay(currentCostume);
+            startCostumeDemo();
+            updateDeliveryProgress();
+        });
+    </script>
+</body>
+</html> 

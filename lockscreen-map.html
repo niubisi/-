@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配送追踪 - 美团外卖</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 44px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-left {
+            color: #000;
+        }
+
+        .status-right {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .battery {
+            width: 24px;
+            height: 12px;
+            border: 1px solid #000;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .battery::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 3px;
+            width: 2px;
+            height: 6px;
+            background: #000;
+            border-radius: 0 1px 1px 0;
+        }
+
+        .battery-fill {
+            height: 100%;
+            width: 75%;
+            background: #34c759;
+            border-radius: 1px;
+        }
+
+        /* 地图容器 */
+        .map-container {
+            position: absolute;
+            top: 44px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 44px);
+            background: linear-gradient(135deg, #e8f4f8 0%, #d1e7dd 100%);
+            overflow: hidden;
+        }
+
+        /* 模拟真实地图 */
+        .map-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                /* 主要道路 */
+                linear-gradient(90deg, transparent 45%, #fff 45%, #fff 55%, transparent 55%),
+                linear-gradient(0deg, transparent 30%, #fff 30%, #fff 35%, transparent 35%),
+                linear-gradient(0deg, transparent 65%, #fff 65%, #fff 70%, transparent 70%),
+                /* 建筑区块 */
+                linear-gradient(45deg, #f8f9fa 25%, transparent 25%),
+                linear-gradient(-45deg, #f8f9fa 25%, transparent 25%),
+                /* 绿化带 */
+                radial-gradient(circle at 20% 20%, #c8e6c9 10%, transparent 10%),
+                radial-gradient(circle at 80% 80%, #c8e6c9 15%, transparent 15%);
+            background-size: 
+                100% 100%,
+                100% 100%, 
+                100% 100%,
+                80px 80px,
+                80px 80px,
+                200px 200px,
+                250px 250px;
+        }
+
+        .road-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .road-line {
+            position: absolute;
+            background: #e0e0e0;
+        }
+
+        .horizontal-road {
+            height: 2px;
+            width: 100%;
+            top: 52%;
+        }
+
+        .vertical-road {
+            width: 2px;
+            height: 100%;
+            left: 60%;
+        }
+
+        /* 骑手头像和装扮 */
+        .rider-avatar {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .rider-icon {
+            width: 100%;
+            height: 100%;
+            background: #FFD100;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 3px solid #fff;
+            position: relative;
+        }
+
+        /* 装扮效果 */
+        .costume-ninja .rider-icon {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            animation: ninjaGlow 2s ease-in-out infinite;
+        }
+
+        .costume-knight .rider-icon {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            animation: knightShine 2s ease-in-out infinite;
+        }
+
+        .costume-cyber .rider-icon {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            animation: cyberPulse 1.5s ease-in-out infinite;
+        }
+
+        .costume-flame .rider-icon {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            animation: flameFlicker 1s ease-in-out infinite;
+        }
+
+        @keyframes ninjaGlow {
+            0%, 100% { box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3); }
+            50% { box-shadow: 0 2px 15px rgba(231, 76, 60, 0.8); }
+        }
+
+        @keyframes knightShine {
+            0%, 100% { box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3); }
+            50% { box-shadow: 0 2px 15px rgba(243, 156, 18, 0.8); }
+        }
+
+        @keyframes cyberPulse {
+            0%, 100% { box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3); }
+            50% { box-shadow: 0 2px 15px rgba(0, 255, 136, 0.8); }
+        }
+
+        @keyframes flameFlicker {
+            0%, 100% { box-shadow: 0 2px 8px rgba(241, 196, 15, 0.3); }
+            50% { box-shadow: 0 2px 15px rgba(241, 196, 15, 0.8); }
+        }
+
+        /* 装扮特效粒子 */
+        .particle-effect {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .ninja-particle {
+            background: #e74c3c;
+            animation: ninjaParticle 2s linear infinite;
+        }
+
+        .knight-particle {
+            background: #f39c12;
+            animation: knightParticle 2s linear infinite;
+        }
+
+        @keyframes ninjaParticle {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(20px, -20px) scale(0); }
+        }
+
+        @keyframes knightParticle {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(-20px, -20px) scale(0); }
+        }
+
+        /* 状态卡片 */
+        .status-card {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            z-index: 200;
+            font-size: 14px;
+            max-width: 200px;
+            animation: cardPop 0.3s ease-out;
+        }
+
+        @keyframes cardPop {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .status-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .status-desc {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .distance-time {
+            color: #FF6600;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* 收益展示 */
+        .earnings-popup {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #FF6600, #FFD100);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 300;
+            animation: earningsFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes earningsFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* 装扮选择器 */
+        .costume-selector {
+            position: absolute;
+            bottom: 120px;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            z-index: 400;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .costume-selector.show {
+            transform: translateY(0);
+        }
+
+        .costume-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #333;
+        }
+
+        .costume-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .costume-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .costume-item:hover {
+            background: #f8f9fa;
+        }
+
+        .costume-item.active {
+            border-color: #FF6600;
+            background: #fff8f0;
+        }
+
+        .costume-emoji {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .costume-name {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .costume-price {
+            font-size: 10px;
+            color: #FF6600;
+            font-weight: 600;
+        }
+
+        /* 底部操作区 */
+        .bottom-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            z-index: 500;
+        }
+
+        .delivery-progress {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #FFD100;
+            width: 60%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #FFD100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.primary {
+            background: #FF6600;
+            color: white;
+            border-color: #FF6600;
+        }
+
+        .costume-toggle {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #FF6600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+            z-index: 300;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="status-left">12:41</div>
+        <div class="status-right">
+            <span>📶</span>
+            <span>📶</span>
+            <span>🔋</span>
+            <div class="battery">
+                <div class="battery-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 地图容器 -->
+    <div class="map-container">
+        <div class="map-background"></div>
+        <div class="road-lines">
+            <div class="road-line horizontal-road"></div>
+            <div class="road-line vertical-road"></div>
+        </div>
+
+        <!-- 骑手1 - 忍者装扮 -->
+        <div class="rider-avatar costume-ninja" id="rider1" style="top: 30%; left: 25%;">
+            <div class="rider-icon">🥷</div>
+        </div>
+
+        <!-- 骑手2 - 骑士装扮 -->
+        <div class="rider-avatar costume-knight" id="rider2" style="top: 55%; left: 65%;">
+            <div class="rider-icon">⚔️</div>
+        </div>
+
+        <!-- 骑手3 - 赛博装扮 -->
+        <div class="rider-avatar costume-cyber" id="rider3" style="top: 40%; left: 45%;">
+            <div class="rider-icon">🤖</div>
+        </div>
+
+        <!-- 骑手4 - 烈焰装扮 -->
+        <div class="rider-avatar costume-flame" id="rider4" style="top: 65%; left: 30%;">
+            <div class="rider-icon">🔥</div>
+        </div>
+
+        <!-- 状态卡片 -->
+        <div class="status-card" style="top: 15%; left: 20%;">
+            <div class="status-title">🥷 忍者小李正在努力送货</div>
+            <div class="status-desc">使用忍者装扮 • 高级会员专享</div>
+            <div class="distance-time">距离您 156m • 预计2分钟</div>
+        </div>
+
+        <div class="status-card" style="top: 45%; left: 50%;">
+            <div class="status-title">⚔️ 骑士王者正在赶往商家</div>
+            <div class="status-desc">黄金骑士装扮 • 收益+30%</div>
+            <div class="distance-time">麦当劳(天河店) • 预计3分钟</div>
+        </div>
+
+        <!-- 收益展示 -->
+        <div class="earnings-popup">
+            💰 装扮收益 +¥12.5
+        </div>
+
+        <!-- 装扮切换按钮 -->
+        <div class="costume-toggle" onclick="toggleCostumeSelector()">
+            🎭
+        </div>
+    </div>
+
+    <!-- 装扮选择器 -->
+    <div class="costume-selector" id="costumeSelector">
+        <div class="costume-title">选择骑手装扮 • 增加收益</div>
+        <div class="costume-grid">
+            <div class="costume-item active" data-costume="default">
+                <div class="costume-emoji">🏍️</div>
+                <div class="costume-name">默认</div>
+                <div class="costume-price">免费</div>
+            </div>
+            <div class="costume-item" data-costume="ninja">
+                <div class="costume-emoji">🥷</div>
+                <div class="costume-name">忍者</div>
+                <div class="costume-price">+25%收益</div>
+            </div>
+            <div class="costume-item" data-costume="knight">
+                <div class="costume-emoji">⚔️</div>
+                <div class="costume-name">骑士</div>
+                <div class="costume-price">+30%收益</div>
+            </div>
+            <div class="costume-item" data-costume="cyber">
+                <div class="costume-emoji">🤖</div>
+                <div class="costume-name">赛博</div>
+                <div class="costume-price">+20%收益</div>
+            </div>
+            <div class="costume-item" data-costume="flame">
+                <div class="costume-emoji">🔥</div>
+                <div class="costume-name">烈焰</div>
+                <div class="costume-price">+35%收益</div>
+            </div>
+            <div class="costume-item" data-costume="ice">
+                <div class="costume-emoji">❄️</div>
+                <div class="costume-name">冰霜</div>
+                <div class="costume-price">+28%收益</div>
+            </div>
+            <div class="costume-item" data-costume="forest">
+                <div class="costume-emoji">🌲</div>
+                <div class="costume-name">森林</div>
+                <div class="costume-price">+22%收益</div>
+            </div>
+            <div class="costume-item" data-costume="royal">
+                <div class="costume-emoji">👑</div>
+                <div class="costume-name">皇家</div>
+                <div class="costume-price">+50%收益</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作区 -->
+    <div class="bottom-actions">
+        <div class="delivery-progress">
+            <div class="progress-icon">🏪</div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-icon">🏠</div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn">联系商家</button>
+            <button class="action-btn">联系骑手</button>
+            <button class="action-btn primary">查看详情</button>
+        </div>
+    </div>
+
+    <script>
+        let costumeSelector = document.getElementById('costumeSelector');
+        let isShowingSelector = false;
+
+        function toggleCostumeSelector() {
+            isShowingSelector = !isShowingSelector;
+            if (isShowingSelector) {
+                costumeSelector.classList.add('show');
+            } else {
+                costumeSelector.classList.remove('show');
+            }
+        }
+
+        // 装扮选择
+        document.querySelectorAll('.costume-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.costume-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                const costume = this.dataset.costume;
+                applyRandomCostume();
+            });
+        });
+
+        // 随机应用装扮
+        function applyRandomCostume() {
+            const riders = document.querySelectorAll('.rider-avatar');
+            const costumes = ['costume-ninja', 'costume-knight', 'costume-cyber', 'costume-flame'];
+            
+            riders.forEach(rider => {
+                rider.className = 'rider-avatar ' + costumes[Math.floor(Math.random() * costumes.length)];
+            });
+        }
+
+        // 骑手移动动画
+        function animateRiders() {
+            const riders = document.querySelectorAll('.rider-avatar');
+            
+            riders.forEach((rider, index) => {
+                setInterval(() => {
+                    const currentTop = parseFloat(rider.style.top);
+                    const currentLeft = parseFloat(rider.style.left);
+                    
+                    const newTop = Math.max(15, Math.min(70, currentTop + (Math.random() - 0.5) * 8));
+                    const newLeft = Math.max(10, Math.min(80, currentLeft + (Math.random() - 0.5) * 8));
+                    
+                    rider.style.top = newTop + '%';
+                    rider.style.left = newLeft + '%';
+                }, 3000 + index * 1000);
+            });
+        }
+
+        // 创建装扮特效
+        function createParticleEffect(rider) {
+            const costume = rider.className.split(' ')[1];
+            const particle = document.createElement('div');
+            particle.className = 'particle-effect';
+            
+            if (costume === 'costume-ninja') {
+                particle.classList.add('ninja-particle');
+            } else if (costume === 'costume-knight') {
+                particle.classList.add('knight-particle');
+            }
+            
+            const riderRect = rider.getBoundingClientRect();
+            particle.style.left = (riderRect.left + 25) + 'px';
+            particle.style.top = (riderRect.top + 25) + 'px';
+            
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 2000);
+        }
+
+        // 定期创建特效
+        setInterval(() => {
+            const riders = document.querySelectorAll('.rider-avatar');
+            riders.forEach(rider => {
+                if (Math.random() < 0.3) {
+                    createParticleEffect(rider);
+                }
+            });
+        }, 1000);
+
+        // 更新进度条
+        function updateProgress() {
+            const progressFill = document.querySelector('.progress-fill');
+            let width = parseInt(progressFill.style.width) || 60;
+            
+            setInterval(() => {
+                width = Math.min(100, width + Math.random() * 2);
+                progressFill.style.width = width + '%';
+            }, 2000);
+        }
+
+        // 初始化
+        animateRiders();
+        updateProgress();
+
+        // 点击骑手显示收益信息
+        document.querySelectorAll('.rider-avatar').forEach(rider => {
+            rider.addEventListener('click', function() {
+                const earnings = document.querySelector('.earnings-popup');
+                earnings.style.display = 'block';
+                earnings.textContent = '💰 ' + this.querySelector('.rider-icon').textContent + ' 装扮收益 +¥' + (Math.random() * 20 + 5).toFixed(1);
+                
+                setTimeout(() => {
+                    earnings.style.display = 'none';
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html> 

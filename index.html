@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美团外卖 - 健康饮食原型</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .prototype-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+        .phone-frame {
+            width: 390px;
+            height: 844px;
+            background: white;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 12px solid #111;
+            position: relative;
+        }
+        .screen {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 28px;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #FFD100;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto py-6">
+        <h1 class="text-3xl font-bold text-center mb-4 text-yellow-500">美团外卖 - 协作生态系统原型</h1>
+        <p class="text-center text-gray-600 mb-8 max-w-4xl mx-auto">
+            打造用户、骑手、平台三方体验机制 —— 不靠补贴竞争，而靠信任与参与感赢得用户，
+            将平台关系从"交易"升级为"协作生态"
+        </p>
+        
+        <div class="prototype-container">
+            <div class="flex flex-col items-center">
+                <h2>首页</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="home.html" title="首页"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>商家详情</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="restaurant.html" title="商家详情"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>菜品详情</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="dish.html" title="菜品详情"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>健康饮食推荐</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="health.html" title="健康饮食推荐"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>个人营养档案</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="profile.html" title="个人营养档案"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 创新功能原型 -->
+            <div class="w-full text-center mt-8 mb-4">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">✨ 创新功能原型</h3>
+                <p class="text-gray-600">基于协作生态理念的全新体验设计</p>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>我的骑士团 🛡️</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="knight.html" title="我的骑士团"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>我的最爱 ❤️</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="favorites.html" title="我的最爱"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>会员权益 👑</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="membership.html" title="会员权益"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>家庭代点 👨‍👩‍👧‍👦</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="family.html" title="家庭代点"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>锁屏配送地图 🗺️</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="lockscreen-map.html" title="锁屏配送地图"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>周期性装扮打赏 🎭</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="rider-costume.html" title="周期性装扮打赏"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h2>实时特效地图 ✨</h2>
+                <div class="phone-frame">
+                    <div class="screen">
+                        <iframe src="map-costume.html" title="实时特效地图"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 功能说明 -->
+        <div class="max-w-6xl mx-auto mt-12 px-4">
+            <h3 class="text-2xl font-bold text-center mb-8 text-gray-800">核心创新功能介绍</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="text-3xl mb-3">🛡️</div>
+                    <h4 class="font-bold text-lg mb-2 text-gray-800">美团外卖骑士团</h4>
+                    <p class="text-gray-600 text-sm">用户购买装扮卡为骑手"变装"，每次配送展示专属动画，增强骑手归属感与用户参与感。</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="text-3xl mb-3">❤️</div>
+                    <h4 class="font-bold text-lg mb-2 text-gray-800">一周菜单锁定</h4>
+                    <p class="text-gray-600 text-sm">基于最爱偏好生成专属优惠，鼓励周期下单，帮助商家调整备货，优化骑手调度。</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="text-3xl mb-3">👑</div>
+                    <h4 class="font-bold text-lg mb-2 text-gray-800">周期免单激励</h4>
+                    <p class="text-gray-600 text-sm">20个工作日周期，订单占比领先即可免单/返券，推动自然留存而非强绑定。</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="text-3xl mb-3">👨‍👩‍👧‍👦</div>
+                    <h4 class="font-bold text-lg mb-2 text-gray-800">家庭代点模式</h4>
+                    <p class="text-gray-600 text-sm">多人拼单享受组合优惠，子女可为父母预设周餐表，远程定时下单，打造家庭粘性。</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="text-3xl mb-3">🗺️</div>
+                    <h4 class="font-bold text-lg mb-2 text-gray-800">锁屏配送地图</h4>
+                    <p class="text-gray-600 text-sm">实时展示骑手位置与专属装扮，用户可跟踪配送进度，观看骑手个性化服务，增强配送透明度。</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 shadow-md border-2 border-orange-200">
+                    <div class="text-3xl mb-3">🎭</div>
+                    <h4 class="font-bold text-lg mb-2 text-orange-600">周期性装扮打赏</h4>
+                    <p class="text-gray-600 text-sm">创新的7次7元周期制，每次配送自动展示特效并扣费，按次结算直接到账。收益100%归骑手，建立长期互动关系。</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 shadow-md border-2 border-purple-200">
+                    <div class="text-3xl mb-3">✨</div>
+                    <h4 class="font-bold text-lg mb-2 text-purple-600">实时特效地图</h4>
+                    <p class="text-gray-600 text-sm">配送地图实时显示装扮特效和剩余次数，每次送达自动扣除并弹出收益提醒，可视化打赏使用过程。</p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-8 p-6 bg-yellow-50 rounded-lg">
+                <h4 class="font-bold text-xl mb-3 text-gray-800">设计理念</h4>
+                <p class="text-gray-700 leading-relaxed">
+                    "美团外卖，做为城市送上熟悉、安心、温度的那群人。"<br>
+                    通过创新的协作机制，让平台、用户、商家、骑手之间形成温暖的社区关系。
+                    <strong class="text-orange-600">周期性装扮打赏系统</strong>以7次7元的创新模式，每次配送自动扣费到账，
+                    收益100%归骑手，用信任与参与感创造可持续的商业价值，促进用户与骑手的长期友好互动。
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
